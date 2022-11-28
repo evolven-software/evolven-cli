@@ -21,6 +21,17 @@ public class EvolvenCommand {
         if (option == null) return;
         command.addOption(getFieldName(option, parent), Short.toString(option));
     }
+
+    void addOption(Integer option, Object parent) throws InvalidParameterException {
+        if (option == null) return;
+        command.addOption(getFieldName(option, parent), Integer.toString(option));
+    }
+
+    void addFlag(Boolean flag, Object parent) throws InvalidParameterException {
+        if (flag == null) return;
+        command.addFlag(getFieldName(flag, parent), flag);
+    }
+
     protected static java.lang.reflect.Field getField(Object fieldObject, Object parent) {
 
         java.lang.reflect.Field[] allFields = parent.getClass().getDeclaredFields();

@@ -43,6 +43,12 @@ class EvolvenLogin extends EvolvenCommand implements Runnable {
         try {
             addOption(url, this);
             addOption(port, this);
+            addOption(username, this);
+            addOption(password, this);
+            addOption(host, this);
+            addOption(timeout, this);
+            addFlag(skipCache, this);
+
         } catch (InvalidParameterException e) {
             throw new RuntimeException(e);
         }
