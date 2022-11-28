@@ -1,15 +1,20 @@
 package com.evolven.cli;
 
 import com.evolven.command.Command;
+import com.evolven.command.CommandException;
 import com.evolven.command.InvalidParameterException;
 
 import java.util.Optional;
 
 public class EvolvenCommand {
-    Command command;
+    private Command command;
     void addExecutor(Command command) {
         this.command = command;
 
+    }
+
+    protected void execute() throws CommandException {
+        command.execute();
     }
 
     void addOption(String option, Object parent) throws InvalidParameterException {
@@ -27,9 +32,11 @@ public class EvolvenCommand {
         command.addOption(getFieldName(option, parent), Integer.toString(option));
     }
 
-    void addFlag(Boolean flag, Object parent) throws InvalidParameterException {
+    protected void  addFlag(Boolean flag, Object parent) throws InvalidParameterException {
         if (flag == null) return;
-        command.addFlag(getFieldName(flag, parent), flag);
+        String fn = getFieldName(flag, parent);
+        System.out.println("adding flag:" + fn);
+        command.addFlag(fn, flag);
     }
 
     protected static java.lang.reflect.Field getField(Object fieldObject, Object parent) {

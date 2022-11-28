@@ -18,7 +18,7 @@ public class EvolvenCreateConfig extends EvolvenCommand implements Runnable {
     public void run() {
         try {
             addFlag(force, this);
-            command.execute();
+            execute();
         } catch (InternalInvalidParameterException e) {
             System.err.println("Internal error: " + e.getMessage());
             throw new RuntimeException(e);

@@ -1,5 +1,6 @@
 package com.evolven.cli;
 
+import com.evolven.command.CommandException;
 import com.evolven.command.InvalidParameterException;
 import picocli.CommandLine;
 import picocli.CommandLine.Spec;
@@ -22,14 +23,15 @@ class EvolvenLogin extends EvolvenCommand implements Runnable {
     @CommandLine.Option(names = {"-P", "--port"}, description = "Password.")
     Short port;
 
-    @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
-    boolean help;
 
     @CommandLine.Option(names = {"-t", "--timeout"}, defaultValue = "150", description = "The session timeout in seconds (max = 150).")
     Integer timeout;
 
     @CommandLine.Option(names = {"-C", "--skip-caching"}, description = "Skip caching data.")
-    Boolean skipCache = false;
+    Boolean skipCache;
+
+    @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
+    boolean help;
 
     @Spec
     CommandSpec spec;
@@ -48,8 +50,11 @@ class EvolvenLogin extends EvolvenCommand implements Runnable {
             addOption(host, this);
             addOption(timeout, this);
             addFlag(skipCache, this);
+            execute();
 
         } catch (InvalidParameterException e) {
+            throw new RuntimeException(e);
+        } catch (CommandException e) {
             throw new RuntimeException(e);
         }
 

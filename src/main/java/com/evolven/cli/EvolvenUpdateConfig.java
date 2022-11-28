@@ -3,8 +3,6 @@ package com.evolven.cli;
 import com.evolven.command.CommandException;
 import com.evolven.command.InternalInvalidParameterException;
 import com.evolven.command.InvalidParameterException;
-import com.evolven.filesystem.CreateEvolvenCliConfigCommand;
-import com.evolven.filesystem.FileSystemManager;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "update-config", header = "Creates configuration files in the current working directory " +
@@ -17,10 +15,8 @@ public class EvolvenUpdateConfig extends EvolvenCommand implements Runnable {
     @Override
     public void run() {
         try {
-            System.out.println(force.getClass().getAnnotation(CommandLine.Option.class).names());
-            command.addFlag("force");
-            command.execute();
-            (new CreateEvolvenCliConfigCommand(new FileSystemManager())).execute();
+            addFlag(force, this);
+            execute();
         } catch (InternalInvalidParameterException e) {
             System.err.println("Internal error: " + e.getMessage());
             throw new RuntimeException(e);

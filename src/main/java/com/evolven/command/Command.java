@@ -36,7 +36,7 @@ public abstract class Command {
         options.put(key, value);
     }
 
-    public void addParameters(String[] params) throws InvalidParameterException {
+    public void addParameters(String[] params) throws InternalInvalidParameterException {
         if (numParams == 0) throw new InternalInvalidParameterException("<positional>");
         parameters.addAll(Arrays.asList(params));
     }
@@ -46,8 +46,9 @@ public abstract class Command {
         flags.put(flag, true);
     }
 
-    public void addFlag(String flag, boolean value) throws InvalidParameterException {
+    public void addFlag(String flag, boolean value) throws InternalInvalidParameterException {
         if (!flags.containsKey(flag)) throw new InternalInvalidParameterException(flag);
+        System.out.println("adding option: " + flag + " : " + value);
         flags.put(flag, value);
     }
 

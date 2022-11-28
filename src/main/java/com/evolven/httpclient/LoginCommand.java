@@ -4,8 +4,6 @@ import com.evolven.command.Command;
 import com.evolven.command.CommandException;
 import com.evolven.filesystem.FileSystemManager;
 
-import java.util.Arrays;
-
 public class LoginCommand extends Command {
     FileSystemManager fileSystemManager;
    public LoginCommand(FileSystemManager fileSystemManager) {
@@ -16,8 +14,9 @@ public class LoginCommand extends Command {
                "url",
                "username",
                "password",
-               "skip-cache",
+               "timeout",
        });
+       registerFlags(new String[] {"skipCache"});
    }
 
     @Override
