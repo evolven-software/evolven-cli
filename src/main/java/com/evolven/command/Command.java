@@ -32,6 +32,7 @@ public abstract class Command {
 
     public void addOption(String key, String value) throws InvalidParameterException {
         if (!options.containsKey(key)) throw new InternalInvalidParameterException(key);
+        System.out.println("adding option: " + key + " : " + value);
         options.put(key, value);
     }
 

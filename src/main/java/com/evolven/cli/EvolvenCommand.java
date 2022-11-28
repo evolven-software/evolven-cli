@@ -1,6 +1,9 @@
 package com.evolven.cli;
 
 import com.evolven.command.Command;
+import com.evolven.command.InvalidParameterException;
+
+import java.util.Optional;
 
 public class EvolvenCommand {
     Command command;
@@ -9,6 +12,15 @@ public class EvolvenCommand {
 
     }
 
+    void addOption(String option, Object parent) throws InvalidParameterException {
+        if (option == null) return;
+        command.addOption(getFieldName(option, parent), option);
+    }
+
+    void addOption(Short option, Object parent) throws InvalidParameterException {
+        if (option == null) return;
+        command.addOption(getFieldName(option, parent), Short.toString(option));
+    }
     protected static java.lang.reflect.Field getField(Object fieldObject, Object parent) {
 
         java.lang.reflect.Field[] allFields = parent.getClass().getDeclaredFields();

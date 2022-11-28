@@ -20,8 +20,8 @@ public class Main {
         //System.out.println();
         FileSystemManager fileSystemManager = new FileSystemManager();
         Command[] commands = new Command[] {
-                new LoginCommand(),
-                new GetPoliciesCommand(),
+                new LoginCommand(fileSystemManager),
+                new GetPoliciesCommand(fileSystemManager),
                 new LogoutCommand(fileSystemManager),
                 new UpdateEvolvenCliConfigCommand(fileSystemManager),
                 new CreateEvolvenCliConfigCommand(fileSystemManager),
