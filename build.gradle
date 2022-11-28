@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+group 'com.evolven'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'info.picocli:picocli:4.7.0'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+    implementation group: 'com.sun.jersey', name: 'jersey-client', version: '1.19.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+jar {
+    manifest {
+        attributes(
+                'Class-Path': configurations.compileClasspath.collect { it.getName() }.join(' '),
+                'Main-Class': 'com.evolven.Main'
+        )
+    }
+}
+
+task copyAllDependencies(type: Copy) {
+    from configurations.runtimeClasspath
+    from jar
+    into "${buildDir}/output/libs"
+}
+build.dependsOn(copyAllDependencies)
+
+
+test {
+    useJUnitPlatform()
+}
