@@ -7,6 +7,7 @@ import com.evolven.filesystem.FileSystemManager;
 import com.evolven.filesystem.LogoutCommand;
 import com.evolven.filesystem.UpdateEvolvenCliConfigCommand;
 import com.evolven.httpclient.GetPoliciesCommand;
+import com.evolven.httpclient.HttpClient;
 import com.evolven.httpclient.LoginCommand;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class Main {
                 new UpdateEvolvenCliConfigCommand(fileSystemManager),
                 new CreateEvolvenCliConfigCommand(fileSystemManager),
         };
+        HttpClient.main();
 
         System.exit(
                 EvolvenCommandLine.execute(

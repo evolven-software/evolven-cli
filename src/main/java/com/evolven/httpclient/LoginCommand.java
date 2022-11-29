@@ -5,6 +5,17 @@ import com.evolven.command.CommandException;
 import com.evolven.filesystem.FileSystemManager;
 
 public class LoginCommand extends Command {
+
+    //https://host13.evolven.com/enlight.server/next/api?action=login
+ //   json:
+ //           true
+ //   user:
+ //   evolven
+ //   pass:
+ //   Mdls1997
+ //   isEncrypted:
+ //           false
+
     FileSystemManager fileSystemManager;
    public LoginCommand(FileSystemManager fileSystemManager) {
        this.fileSystemManager = fileSystemManager;
@@ -16,11 +27,12 @@ public class LoginCommand extends Command {
                "password",
                "timeout",
        });
-       registerFlags(new String[] {"skipCache"});
+       registerFlag("skipCache");
    }
 
     @Override
     public void execute() throws CommandException {
+
 
     }
 

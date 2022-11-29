@@ -22,6 +22,10 @@ public abstract class Command {
         Arrays.stream(flags).sequential().forEach(f -> this.flags.put(f, false));
     }
 
+    protected void registerFlag(String flag) {
+        flags.put(flag, false);
+    }
+
     protected void registerParams(int numParams) {
         this.numParams = numParams;
         if (numParams != 0) {
