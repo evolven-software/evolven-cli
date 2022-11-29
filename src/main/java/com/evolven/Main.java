@@ -2,13 +2,13 @@ package com.evolven;
 
 import com.evolven.cli.EvolvenCommandLine;
 import com.evolven.command.Command;
-import com.evolven.filesystem.CreateEvolvenCliConfigCommand;
+import com.evolven.filesystem.command.CreateEvolvenCliConfigCommand;
 import com.evolven.filesystem.FileSystemManager;
-import com.evolven.filesystem.LogoutCommand;
-import com.evolven.filesystem.UpdateEvolvenCliConfigCommand;
-import com.evolven.httpclient.GetPoliciesCommand;
-import com.evolven.httpclient.HttpClient;
-import com.evolven.httpclient.LoginCommand;
+import com.evolven.filesystem.command.LogoutCommand;
+import com.evolven.filesystem.command.UpdateEvolvenCliConfigCommand;
+import com.evolven.httpclient.command.GetPoliciesCommand;
+import com.evolven.httpclient.http.HttpClient;
+import com.evolven.httpclient.command.LoginCommand;
 
 import java.io.IOException;
 import java.util.Arrays;

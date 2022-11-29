@@ -1,7 +1,8 @@
-package com.evolven.filesystem;
+package com.evolven.filesystem.command;
 
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
+import com.evolven.filesystem.FileSystemManager;
 
 import java.io.File;
 

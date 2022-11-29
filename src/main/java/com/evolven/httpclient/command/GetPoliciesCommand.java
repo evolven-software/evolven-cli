@@ -1,4 +1,4 @@
-package com.evolven.httpclient;
+package com.evolven.httpclient.command;
 
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;

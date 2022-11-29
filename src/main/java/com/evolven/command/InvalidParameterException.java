@@ -2,12 +2,15 @@ package com.evolven.command;
 
 
 public class InvalidParameterException extends Exception {
-
-    void addInvalidOption(String option, String invalidParameter, String explanation) {
-
+    public InvalidParameterException(String msg) {
+        super(msg);
     }
 
-    void addInvalidParameter(String invalidParameter, String explanation) {
+    public InvalidParameterException(String option, String invalidParameter, String explanation) {
+        super(option);
+    }
 
+    public InvalidParameterException(String invalidParameter, String explanation) {
+        super(invalidParameter);
     }
 }

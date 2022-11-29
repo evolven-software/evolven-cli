@@ -63,4 +63,26 @@ public class EvolvenCliConfig {
     public String getUsername() {
         return get(USERNAME_KEY);
     }
+
+    public void setHost(String s) {
+        
+    }
+
+    public void setPort(String s) {
+    }
+
+    public void setUrl(String s) {
+    }
+
+    public String getBaseUrl() {
+        return null;
+    }
+
+    public String getHost() {
+        return null;
+    }
+
+    public Integer getPort() {
+        return null;
+    }
 }

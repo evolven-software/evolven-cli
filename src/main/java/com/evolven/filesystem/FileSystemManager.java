@@ -32,6 +32,10 @@ public class FileSystemManager {
         return configFile;
     }
 
+    public EvolvenCliConfig getConfig() {
+        return new EvolvenCliConfig(this);
+    }
+
     File getCreateConfigDirectoryAtUserHone() {
         File userDirectory = FileUtils.getUserDirectory();
         if (!userDirectory.exists() || !userDirectory.isDirectory()) return null;
@@ -100,8 +104,8 @@ public class FileSystemManager {
 
     }
 
-    public Optional<String> getApiKey() {
-        return Optional.empty();
+    public String getApiKey() {
+        return null;
     }
 
     public void invalidateApiKey() {
