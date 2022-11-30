@@ -20,9 +20,9 @@ public class EvolvenUpdateConfig extends EvolvenCommand implements Runnable {
         } catch (InternalInvalidParameterException e) {
             System.err.println("Internal error: " + e.getMessage());
             throw new RuntimeException(e);
-        } catch (CommandException e) {
-            throw new RuntimeException(e);
         } catch (InvalidParameterException e) {
+            throw new RuntimeException(e);
+        } catch (CommandException e) {
             throw new RuntimeException(e);
         }
     }

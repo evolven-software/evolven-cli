@@ -1,5 +1,7 @@
 package com.evolven.httpclient;
 
+import com.evolven.command.InvalidParameterException;
+import com.evolven.common.StringUtils;
 import com.evolven.filesystem.EvolvenCliConfig;
 import com.evolven.httpclient.http.URLBuilder;
 
@@ -35,9 +37,19 @@ public class CachedURLBuilder {
         }
         urlBuilder.setHost(host);
         if (port == null) {
-            port = config.getPort();
+                String portValue = config.getPort();
+                if (portValue != null) {
+                    try {
+                        port = Integer.parseInt(portValue);
+                    } catch (NumberFormatException e) {
+                        throw new MalformedURLException("Invalid cached value for port: " + port);
+                    }
+                }
         }
-        urlBuilder.setPort(port);
+
+        if (port != null) {
+            urlBuilder.setPort(port);
+        }
         urlBuilder.setPath(path);
         urlBuilder.addParameters(params);
         return urlBuilder.build();
@@ -52,8 +64,13 @@ public class CachedURLBuilder {
         this.host = host;
     }
 
-    public void setPort(String port) {
-        this.port = Integer.parseInt(port);
+    public void setPort(String port) throws InvalidParameterException {
+        if (StringUtils.isNullOrBlank(port)) return;
+        try {
+            this.port = Integer.parseInt(port);
+        } catch (NumberFormatException e) {
+            throw new InvalidParameterException("port", port, "Can't parse value to integer.");
+        }
     }
 
     public String getBaseUrl() {

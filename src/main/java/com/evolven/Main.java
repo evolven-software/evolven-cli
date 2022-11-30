@@ -27,7 +27,7 @@ public class Main {
                 new UpdateEvolvenCliConfigCommand(fileSystemManager),
                 new CreateEvolvenCliConfigCommand(fileSystemManager),
         };
-        HttpClient.main();
+        //HttpClient.getPoliciesTest();
 
         System.exit(
                 EvolvenCommandLine.execute(

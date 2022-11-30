@@ -14,7 +14,7 @@ class EvolvenLogin extends EvolvenCommand implements Runnable {
     @CommandLine.Option(names = {"-u", "--username"}, description = "Username.")
     String username;
 
-    @CommandLine.Option(names = {"-p", "--password"}, required = true, description = "Password.")
+    @CommandLine.Option(names = {"-p", "--password"}, /* required = true,*/ description = "Password.")
     String password;
 
     @CommandLine.Option(names = {"-H", "--host"}, description = "Password.")
@@ -57,7 +57,5 @@ class EvolvenLogin extends EvolvenCommand implements Runnable {
         } catch (CommandException e) {
             throw new RuntimeException(e);
         }
-
-        System.out.println(username + ":" + password + "@" + url);
     }
 }

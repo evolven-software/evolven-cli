@@ -90,7 +90,6 @@ public class HttpClient {
             String result = new BufferedReader(new InputStreamReader(entity.getContent()))
                     .lines()
                     .collect(Collectors.joining("\n"));
-            System.out.println(result);
             EntityUtils.consume(entity);
             return new HttpRequestResult(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase(), result);
         } catch (IOException e) {
@@ -136,7 +135,7 @@ public class HttpClient {
         return post(url, stringEntity);
     }
 
-    public static void main() {
+    public static void loginTest() {
 
         try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
             HttpPost httpPost = new HttpPost("https://host13.evolven.com/enlight.server/next/api?action=login");
@@ -169,4 +168,34 @@ public class HttpClient {
             throw new RuntimeException(e);
         }
     }
+
+    public static void getPoliciesTest() {
+        try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+            HttpPost httpPost = new HttpPost("https://host13.evolven.com/enlight.server/next/policy?action=get&json=true");
+            List<NameValuePair> nvps = new ArrayList<>();
+            nvps.add(new BasicNameValuePair("EvolvenSessionKey", "f641f8e507c14e734ce3e2740e7fd2a88b1bcc73"));
+            try {
+                UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nvps);
+                String input = new BufferedReader(new InputStreamReader(urlEncodedFormEntity.getContent()))
+                        .lines().collect(Collectors.joining("&"));
+                System.out.println("Input: " + input);
+                httpPost.setEntity(urlEncodedFormEntity);
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+
+            try (CloseableHttpResponse response2 = httpclient.execute(httpPost)) {
+                System.out.println(response2.getStatusLine().getStatusCode() + " " + response2.getStatusLine().getReasonPhrase());
+                HttpEntity entity2 = response2.getEntity();
+                InputStream inputStream = entity2.getContent();
+                String result = new BufferedReader(new InputStreamReader(inputStream))
+                        .lines().collect(Collectors.joining("\n"));
+                System.out.println(result);
+                EntityUtils.consume(entity2);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

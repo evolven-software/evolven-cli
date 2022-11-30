@@ -1,5 +1,6 @@
 package com.evolven.httpclient;
 
+import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.http.HttpClient;
 import com.evolven.httpclient.http.HttpRequestResult;
 import com.evolven.httpclient.http.URLBuilder;
@@ -23,7 +24,7 @@ public class EvolvenHttpClient {
         URL url =  null;
         try {
             URIBuilder builder = new URIBuilder(baseUrl);
-            builder.setPath("/enlight.server/next");
+            builder.setPath("/enlight.server/next/api");
             builder.setParameter("action", "login");
             url = builder.build().toURL();
         } catch (URISyntaxException | MalformedURLException e) {
@@ -35,6 +36,23 @@ public class EvolvenHttpClient {
                 {"pass", password},
                 {"isEncrypted", "false"},
                 {"ForceIP", "true"},
+        }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        return HttpClient.post(url, body);
+    }
+
+    public HttpRequestResult getPolicies(String apiKey) {
+        URL url =  null;
+        try {
+            URIBuilder builder = new URIBuilder(baseUrl);
+            builder.setPath("/enlight.server/next/policy");
+            builder.setParameter("action", "get");
+            builder.setParameter("json", "true");
+            url = builder.build().toURL();
+        } catch (URISyntaxException | MalformedURLException e) {
+            return new HttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
+        }
+        Map<String, String> body = Stream.of(new String[][] {
+                {"EvolvenSessionKey", apiKey},
         }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
         return HttpClient.post(url, body);
     }

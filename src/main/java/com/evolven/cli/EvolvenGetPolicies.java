@@ -1,5 +1,7 @@
 package com.evolven.cli;
 
+import com.evolven.command.CommandException;
+import com.evolven.command.InvalidParameterException;
 import picocli.CommandLine;
 
 import java.io.File;
@@ -19,14 +21,33 @@ class EvolvenGetPolicies extends EvolvenCommand implements Runnable {
 
     @CommandLine.Option(names = {"-F", "--format"}, description = "The output format." +
             " Options: \n\t1. Row (JSON). \n\t2. Yaml.\n\t3) Key-value pairs")
-    OutputFormat outputFormat = OutputFormat.ROW;
+    OutputFormat outputFormat = OutputFormat.JSON;
+
+    @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
+    boolean help;
+
+    @CommandLine.Spec
+    CommandLine.Model.CommandSpec spec;
 
     @Override
     public void run() {
+        if (help) {
+            spec.commandLine().usage(System.out);
+            return;
+        }
+        try {
+            //addOption(url, this);
+            execute();
+
+        } catch (InvalidParameterException e) {
+            throw new RuntimeException(e);
+        } catch (CommandException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     enum OutputFormat {
-        ROW,
+        JSON,
         YAML,
         KV //TODO is required?
     }

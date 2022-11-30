@@ -1,5 +1,8 @@
 package com.evolven.httpclient.http;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
+
 public class HttpRequestResult {
 
     private int statusCode;
@@ -9,6 +12,29 @@ public class HttpRequestResult {
         this.statusCode = statusCode;
         this.reasonPhrase = reasonPhrase;
         this.content = content;
+    }
+
+    public boolean isSuccess() {
+        return statusCode >= 200 && statusCode < 400;
+    }
+
+    public boolean isError() {
+        return !isSuccess();
+    }
+
+    public void print(OutputStream os) {
+        PrintStream ps = new PrintStream(os);
+        if (!isSuccess()) {
+            ps.println("HTTP request error (status code " + statusCode + ").");
+            if (reasonPhrase != null) {
+                ps.println(reasonPhrase);
+            }
+        } else {
+            ps.println("HTTP request status code: " + statusCode + ".");
+        }
+        if (content != null) {
+            ps.println(content);
+        }
     }
 
     public HttpRequestResult(String msg) {
