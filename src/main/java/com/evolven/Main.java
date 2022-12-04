@@ -7,6 +7,7 @@ import com.evolven.filesystem.FileSystemManager;
 import com.evolven.filesystem.command.LogoutCommand;
 import com.evolven.filesystem.command.UpdateEvolvenCliConfigCommand;
 import com.evolven.httpclient.command.GetPoliciesCommand;
+import com.evolven.httpclient.command.PushPolicyCommand;
 import com.evolven.httpclient.http.HttpClient;
 import com.evolven.httpclient.command.LoginCommand;
 
@@ -23,6 +24,7 @@ public class Main {
         Command[] commands = new Command[] {
                 new LoginCommand(fileSystemManager),
                 new GetPoliciesCommand(fileSystemManager),
+                new PushPolicyCommand(fileSystemManager),
                 new LogoutCommand(fileSystemManager),
                 new UpdateEvolvenCliConfigCommand(fileSystemManager),
                 new CreateEvolvenCliConfigCommand(fileSystemManager),

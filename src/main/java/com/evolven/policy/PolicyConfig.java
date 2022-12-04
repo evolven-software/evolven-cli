@@ -5,35 +5,38 @@ import com.evolven.filesystem.FileSystemManager;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class PolicyConfig {
 
 
-    String[] initialPolicyFields = new String[] {
+    FileSystemManager fileSystemManager;
+    public static final Set<String> editablePolicyFields = new HashSet<>(Arrays.asList(
             "Comment",
             "Enabled",
             "EnvironmentType",
+            "EnvironmentName ",
             "Folder",
-            "Guid",
-            "IsPublic",
             "Name",
             "Path",
-            "SkipMissing",
             "Tags",
             "Token",
-            "Value",
-    };
+            "Value"));
 
     public String getInitialConfig() {
         final StringBuilder sb = new StringBuilder("fields\n");
         Consumer<String> consumer = (s) -> sb.append("- ").append(s).append("\n");
-        Arrays.stream(initialPolicyFields).forEach(consumer);
+        editablePolicyFields.stream().forEach(consumer);
         return sb.toString();
 
     }
 
-    FileSystemManager fileSystemManager;
+
+    public Set<String> getEditablePolicyFields() {
+        return editablePolicyFields;
+    }
 
     public PolicyConfig(FileSystemManager fileSystemManager) {
         this.fileSystemManager = fileSystemManager;

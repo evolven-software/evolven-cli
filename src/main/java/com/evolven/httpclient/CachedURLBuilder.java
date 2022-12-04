@@ -25,6 +25,9 @@ public class CachedURLBuilder {
     private Map<String, String> params = new HashMap<String, String>();
 
 
+    public static String createBaseUrl(EvolvenCliConfig config) throws MalformedURLException {
+        return new CachedURLBuilder(config).build();
+    }
 
     public String build() throws MalformedURLException {
         URLBuilder urlBuilder = new URLBuilder();

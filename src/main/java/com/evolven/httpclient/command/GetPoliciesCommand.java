@@ -11,8 +11,9 @@ import com.evolven.httpclient.http.HttpRequestResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,13 +28,11 @@ public class GetPoliciesCommand extends Command {
     public static final String FLAG_FORCE = "force";
 
     public GetPoliciesCommand(FileSystemManager fileSystemManager) {
-
         registerOptions(new String[] {
                 OPTION_OUTPUT,
                 OPTION_SINGLE_FILENAME,
                 OPTION_FORMAT,
         });
-
         registerFlag(FLAG_FORCE);
         this.fileSystemManager = fileSystemManager;
     }
@@ -92,7 +91,11 @@ public class GetPoliciesCommand extends Command {
             //System.out.println("Policy name: " + policyName);
             //System.out.println("------------------------------------------------------------");
 
-            String yamlString = new YAMLMapper().writeValueAsString(rule);
+            YAMLMapper mapper = new YAMLMapper(YAMLFactory.builder()
+                    .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+                    .build());
+
+            String yamlString = mapper.writeValueAsString(rule);
             Files.write(new File(outputDirectory, policyName + ".yaml").toPath(), yamlString.getBytes());
 
             //YAMLMapper yamlMapper = new YAMLMapper();

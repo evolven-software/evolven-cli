@@ -7,7 +7,6 @@ import com.evolven.common.Enum;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
 
 public class EvolvenCommand {
     private Command command;

@@ -37,6 +37,7 @@ public class EvolvenCommandLine implements Runnable {
         return new EvolvenCommand[] {
                 new EvolvenLogin(),
                 new EvolvenGetPolicies(),
+                new EvolvenPushPolicy(),
                 new EvolvenUpdateConfig(),
                 new EvolvenCreateConfig(),
                 new EvolvenLogout(),

@@ -56,4 +56,40 @@ public class EvolvenHttpClient {
         }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
         return HttpClient.post(url, body);
     }
+
+    public HttpRequestResult updatePolicy(String apiKey, Map<String, String> body) {
+        URL url =  null;
+        try {
+            URIBuilder builder = new URIBuilder(baseUrl);
+            builder.setPath("/enlight.server/next/policy");
+            builder.setParameter("action", "update");
+            builder.setParameter("json", "true");
+            url = builder.build().toURL();
+        } catch (URISyntaxException | MalformedURLException e) {
+            return new HttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
+        }
+
+        body.put("EvolvenSessionKey", apiKey);
+        body.put("updateExisting", "true");
+        return HttpClient.post(url, body);
+    }
+
+    public HttpRequestResult pushPolicy(String apiKey, Map<String, String> body) {
+        URL url =  null;
+        try {
+            URIBuilder builder = new URIBuilder(baseUrl);
+            builder.setPath("/enlight.server/next/policy");
+            builder.setParameter("action", "create");
+            builder.setParameter("json", "true");
+            url = builder.build().toURL();
+        } catch (URISyntaxException | MalformedURLException e) {
+            return new HttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
+        }
+
+        body.put("EvolvenSessionKey", apiKey);
+        body.put("updateExisting", "true");
+        body.put("envId", "de");
+        return HttpClient.post(url, body);
+    }
+
 }
