@@ -3,7 +3,10 @@ package com.evolven.cli;
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
 import com.evolven.command.InvalidParameterException;
+import com.evolven.common.Enum;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 
 public class EvolvenCommand {
@@ -22,9 +25,24 @@ public class EvolvenCommand {
         command.addOption(getFieldName(option, parent), option);
     }
 
+    void addOption(Enum option, Object parent) throws InvalidParameterException {
+        if (option == null) return;
+        command.addOption(getFieldName(option, parent), option.getName());
+    }
+
+    void addOption(String name, String value) throws InvalidParameterException {
+        if (name == null) return;
+        command.addOption(name, value);
+    }
+
     void addOption(Short option, Object parent) throws InvalidParameterException {
         if (option == null) return;
         command.addOption(getFieldName(option, parent), Short.toString(option));
+    }
+
+    void addOption(File option, Object parent) throws InvalidParameterException, IOException {
+        if (option == null) return;
+        command.addOption(getFieldName(option, parent), option.getCanonicalPath());
     }
 
     void addOption(Integer option, Object parent) throws InvalidParameterException {
@@ -35,7 +53,6 @@ public class EvolvenCommand {
     protected void  addFlag(Boolean flag, Object parent) throws InvalidParameterException {
         if (flag == null) return;
         String fn = getFieldName(flag, parent);
-        System.out.println("adding flag:" + fn);
         command.addFlag(fn, flag);
     }
 

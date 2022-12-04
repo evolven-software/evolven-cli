@@ -149,7 +149,6 @@ public class HttpClient {
                 UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nvps);
                 String input = new BufferedReader(new InputStreamReader(urlEncodedFormEntity.getContent()))
                         .lines().collect(Collectors.joining("&"));
-                System.out.println("Input: " + input);
                 httpPost.setEntity(urlEncodedFormEntity);
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);

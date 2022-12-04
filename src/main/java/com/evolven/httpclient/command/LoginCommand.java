@@ -91,7 +91,7 @@ public class LoginCommand extends Command {
                 new InvalidParameterException("No password provided."));
         HttpRequestResult result = evolvenHttpClient.login(username, password);
 
-        if (result.getStatusCode() != 200) {
+        if (result.isError()) {
             String errorMsg = "Failed to login with the provided/cached details.";
             String reasonPhrase = result.getReasonPhrase();
             if (!StringUtils.isNullOrBlank(reasonPhrase)) {
@@ -99,13 +99,16 @@ public class LoginCommand extends Command {
             }
             throw new CommandException(errorMsg);
         }
-        result.print(System.out);
+        cacheApiKey(result, config);
+    }
+
+    private void cacheApiKey(HttpRequestResult result, EvolvenCliConfig config) throws CommandException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = null;
         try {
             jsonObject = (JSONObject) parser.parse(result.getContent());
         } catch (ParseException e) {
-            throw new RuntimeException(e);
+            throw new CommandException("Failed to parse server's response. " + e.getMessage());
         }
         JSONObject next = (JSONObject) jsonObject.get("Next");
         String apiKey = (String) next.get("ID");

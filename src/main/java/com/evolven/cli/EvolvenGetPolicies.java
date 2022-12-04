@@ -2,26 +2,28 @@ package com.evolven.cli;
 
 import com.evolven.command.CommandException;
 import com.evolven.command.InvalidParameterException;
+import com.evolven.common.PolicyFormat;
 import picocli.CommandLine;
 
 import java.io.File;
+import java.io.IOException;
 
 // defines some commands to show in the list (option/parameters fields omitted for this demo)
 @CommandLine.Command(name = "get-policies", header = "Download all th Evolven policies.")
 class EvolvenGetPolicies extends EvolvenCommand implements Runnable {
 
-    @CommandLine.Option(names = {"-o", "--output"}, description = "The output file/directory. The location will be created.")
-    File files;
+    @CommandLine.Option(names = {"-o", "--output-directory"}, defaultValue = "evolven-policies", description = "The output file/directory. The location will be created.")
+    File output;
 
-    @CommandLine.Option(names = {"-s", "--single-file"}, description = "Output to a single file.")
-    boolean singleFile;
+    @CommandLine.Option(names = {"-s", "--single-file"}, defaultValue = "policies", description = "Output to a single file.")
+    String filename;
 
     @CommandLine.Option(names = {"-f", "--force"}, description = "Override the file if exists.")
     boolean force;
 
-    @CommandLine.Option(names = {"-F", "--format"}, description = "The output format." +
-            " Options: \n\t1. Row (JSON). \n\t2. Yaml.\n\t3) Key-value pairs")
-    OutputFormat outputFormat = OutputFormat.JSON;
+    @CommandLine.Option(names = {"-F", "--format"}, defaultValue = "YAML", description = "The output format." +
+            " Options: \n\t1. JSON. \n\t2. Yaml.\n\t3) ROW")
+    PolicyFormat format;
 
     @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
     boolean help;
@@ -36,12 +38,16 @@ class EvolvenGetPolicies extends EvolvenCommand implements Runnable {
             return;
         }
         try {
-            //addOption(url, this);
+            addOption(output, this);
+            addOption(filename, this);
+            addOption(format, this);
+            addFlag(force, this);
             execute();
-
         } catch (InvalidParameterException e) {
             throw new RuntimeException(e);
         } catch (CommandException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -49,6 +55,6 @@ class EvolvenGetPolicies extends EvolvenCommand implements Runnable {
     enum OutputFormat {
         JSON,
         YAML,
-        KV //TODO is required?
+        ROW
     }
 }

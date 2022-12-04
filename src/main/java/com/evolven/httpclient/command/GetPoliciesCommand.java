@@ -6,20 +6,35 @@ import com.evolven.common.StringUtils;
 import com.evolven.filesystem.EvolvenCliConfig;
 import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.CachedURLBuilder;
-import com.evolven.httpclient.CachedValue;
 import com.evolven.httpclient.EvolvenHttpClient;
 import com.evolven.httpclient.http.HttpRequestResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import org.apache.commons.io.FileUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
 
 public class GetPoliciesCommand extends Command {
     FileSystemManager fileSystemManager;
+    public static final String OPTION_OUTPUT = "output";
+    public static final String OPTION_SINGLE_FILENAME = "filename";
+    public static final String OPTION_FORMAT = "format";
+    public static final String FLAG_FORCE = "force";
 
     public GetPoliciesCommand(FileSystemManager fileSystemManager) {
+
+        registerOptions(new String[] {
+                OPTION_OUTPUT,
+                OPTION_SINGLE_FILENAME,
+                OPTION_FORMAT,
+        });
+
+        registerFlag(FLAG_FORCE);
         this.fileSystemManager = fileSystemManager;
     }
 
@@ -35,7 +50,6 @@ public class GetPoliciesCommand extends Command {
     @Override
     public void execute() throws CommandException {
         EvolvenCliConfig config = fileSystemManager.getEvolvenCliConfig();
-        CachedValue cachedValue = new CachedValue(options);
         String baseUrl = createBaseUrl(config);
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
         getPolicies(evolvenHttpClient, config);
@@ -55,13 +69,41 @@ public class GetPoliciesCommand extends Command {
             }
             throw new CommandException(errorMsg);
         }
+        //System.out.println(result.getContent());;
         try {
-            System.out.println(asYaml(result.getContent()));;
+            toYamlFiles(result.getContent());
         } catch (JsonProcessingException e) {
+            System.out.println("ERROR");
+            System.out.println(e.getMessage());
+        } catch (IOException e) {
+            System.out.println("ERROR");
             System.out.println(e.getMessage());
         }
     }
 
+    public void toYamlFiles(String jsonString) throws IOException {
+        File outputDirectory = new File(options.get(OPTION_OUTPUT));
+        Files.createDirectories(outputDirectory.toPath());
+        JsonNode jsonNodeTree = new ObjectMapper().readTree(jsonString);
+        JsonNode rules = jsonNodeTree.get("Next").get("Rule");
+        for (JsonNode rule : rules) {
+            String policyName = rule.get("Name").asText().replaceAll("[^a-zA-Z0-9\\.\\-]", "_"); ;
+            //System.out.println(jsonAsYaml);
+            //System.out.println("Policy name: " + policyName);
+            //System.out.println("------------------------------------------------------------");
+
+            String yamlString = new YAMLMapper().writeValueAsString(rule);
+            Files.write(new File(outputDirectory, policyName + ".yaml").toPath(), yamlString.getBytes());
+
+            //YAMLMapper yamlMapper = new YAMLMapper();
+            //yamlMapper.writeValue(System.out, rule);
+            //System.out.println("------------------------------------------------------------");
+
+
+            //System.out.println(yamlMapper.writeValueAsString(rule));
+        }
+
+    }
     public String asYaml(String jsonString) throws JsonProcessingException  {
         JsonNode jsonNodeTree = new ObjectMapper().readTree(jsonString);
         String jsonAsYaml = new YAMLMapper().writeValueAsString(jsonNodeTree);

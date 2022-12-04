@@ -1,10 +1,11 @@
 package com.evolven.filesystem;
 
+import com.evolven.policy.PolicyConfig;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
+import java.nio.file.Files;
 
 public class FileSystemManager {
 
@@ -12,24 +13,31 @@ public class FileSystemManager {
     final static int DEFAULT_API_KEY_TIMEOUT = 150;
     final static String CONFIG_DIRECTORY_NAME = ".evolven-cli";
     final static String CONFIG_NAME = "evolven-cli.config";
+
+    final static String POLICY_CONFIG_NAME = "policy.yaml";
     public final File configDirectory;
     public final File configFile;
 
-    public FileSystemManager() {
+    public FileSystemManager() throws IOException {
         configDirectory = getCreateConfigDirectory();
         configFile = getCreateConfigFile(configDirectory);
     }
 
-    private File getCreateConfigFile(File configDirectory) {
-        File configFile = new File(configDirectory, CONFIG_NAME);
-        if (!configFile.exists()) {
+    private static File getCreateFile(File directory, String filename) {
+        File file = new File(directory, filename);
+        if (!file.exists()) {
             try {
-                configFile.createNewFile();
+                FileUtils.createParentDirectories(file);
+                file.createNewFile();
             } catch (IOException e) {
                 return null;
             }
         }
-        return configFile;
+        return file;
+    }
+
+    private File getCreateConfigFile(File configDirectory) {
+        return getCreateFile(configDirectory, CONFIG_NAME);
     }
 
     public EvolvenCliConfig getConfig() {
@@ -55,30 +63,23 @@ public class FileSystemManager {
         return configDirectory;
     }
 
-    public File getCreateConfigDirectory() {
+    public File getCreateConfigDirectory() throws IOException {
         File configDirectory = new File(new File("").getAbsolutePath(), CONFIG_DIRECTORY_NAME);
-        if (configDirectory.exists() && configDirectory.isDirectory() && testConfingDirectory(configDirectory)) {
+        if (configDirectory.exists() && configDirectory.isDirectory() && testConfigDirectory(configDirectory)) {
             return configDirectory;
         }
         configDirectory = getCreateConfigDirectoryAtUserHone();
-        if (configDirectory != null) {
-           if (testConfingDirectory(configDirectory)) {
-               return configDirectory;
-           }
-        }
-        try {
+        if (configDirectory == null) {
             configDirectory = getCreateConfigDirectoryAtJarLocation();
-            if (configDirectory != null) {
-                if (testConfingDirectory(configDirectory)) {
-                    return configDirectory;
-                }
-            }
-        } catch (IOException e) {}
-
+        }
+        if (configDirectory != null && testConfigDirectory(configDirectory)) {
+            getPolicyConfig().createInitialConfigs();
+            return configDirectory;
+        }
         return null ;
     }
 
-    private boolean testConfingDirectory(File configDirectory) {
+    private boolean testConfigDirectory(File configDirectory) {
         try {
             File tmpFile = File.createTempFile("evolven-cli", null,configDirectory);
             tmpFile.delete();
@@ -92,17 +93,6 @@ public class FileSystemManager {
         return new EvolvenCliConfig(this);
     }
 
-    public Optional<File> getApiKeyFile() {
-        return null ;
-    }
-
-    public void cacheApiKey(String key) {
-        cacheApiKey(key, DEFAULT_API_KEY_TIMEOUT);
-    }
-
-    public void cacheApiKey(String key, int timeout) {
-
-    }
 
     public String getApiKey() {
         return null;
@@ -149,10 +139,43 @@ public class FileSystemManager {
         if (!configDirectory.exists()) {
             if (!configDirectory.mkdir()) return null;
         }
-        if (!testConfingDirectory(configDirectory)) {
+        if (!testConfigDirectory(configDirectory)) {
             //TODO log
             return null;
         }
         return configDirectory;
+    }
+
+
+    public File createInitialPolicyConfig(String data) throws IOException {
+        return createNewFile(data, POLICY_CONFIG_NAME);
+    }
+
+    public PolicyConfig getPolicyConfig() {
+        return new PolicyConfig(this);
+    }
+
+    public File createNewFile(String data, String filename) throws IOException {
+        return createNewFile(data, filename, true);
+    }
+
+    public File createNewFile(String data, String filename, boolean force) throws IOException {
+        File file = new File(configDirectory, filename);
+        if (file.exists()) {
+            if (!force) {
+                return null;
+            }
+            if (file.isDirectory()) {
+                String msg = "the requested file ";
+                try {
+                    msg += "(" + file.getCanonicalPath() + ")";
+                } catch (IOException e) {
+                }
+                msg += " is a directory.";
+                throw new IOException(msg);
+            }
+        }
+        Files.write(file.toPath(), data.getBytes());
+        return file;
     }
 }
