@@ -7,6 +7,8 @@ import picocli.CommandLine.Spec;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Command(name = "evolven", mixinStandardHelpOptions = true, version = "Evolven CLI 1.0",
         description = "Evolven command line interface",
@@ -32,39 +34,4 @@ public class EvolvenCommandLine implements Runnable {
         // if the command was invoked without subcommand, show the usage help
         spec.commandLine().usage(System.err);
     }
-
-    private static EvolvenCommand[] getEvolvenCommands() {
-        return new EvolvenCommand[] {
-                new EvolvenLogin(),
-                new EvolvenGetPolicies(),
-                new EvolvenPushPolicy(),
-                new EvolvenUpdateConfig(),
-                new EvolvenCreateConfig(),
-                new EvolvenLogout(),
-        };
-    }
-
-    private static void addExecutors(CommandLine cli, EvolvenCommand[] evolvenCommands, Map<String, com.evolven.command.Command> commands) {
-        Arrays.stream(evolvenCommands).forEach(evolvenCommand -> {
-            String commandName = evolvenCommand.getClass().getAnnotation(Command.class).name();
-            evolvenCommand.addExecutor(commands.get(commandName));
-            cli.addSubcommand(commandName, evolvenCommand);
-        });
-    }
-
-    public static CommandLine createCLI(Map<String, com.evolven.command.Command> commands) {
-        CommandLine cli = new CommandLine(new EvolvenCommandLine());
-        EvolvenCommand[] evolvenCommands = getEvolvenCommands();
-        addExecutors(cli, evolvenCommands, commands);
-        return cli;
-    }
-
-    public static int execute(Map<String, com.evolven.command.Command> commands, String[] args) {
-        return createCLI(commands).execute(args);
-    }
-
-    public static int execute(CommandLine cli, String[] args) {
-        return cli.execute(args);
-    }
-
 }

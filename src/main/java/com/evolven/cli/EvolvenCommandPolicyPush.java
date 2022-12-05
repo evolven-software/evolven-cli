@@ -1,11 +1,12 @@
 package com.evolven.cli;
 
+import com.evolven.command.Command;
 import com.evolven.command.CommandException;
 import com.evolven.command.InvalidParameterException;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "push-policy", header = "Upload an Evolven policy")
-public class EvolvenPushPolicy extends EvolvenCommand implements Runnable {
+public class EvolvenCommandPolicyPush extends EvolvenCommand implements Runnable {
 
     @CommandLine.Option(names = {"-f", "--policy-file"}, required = true, description = "Path to a policy file.")
     String filename;
@@ -15,6 +16,10 @@ public class EvolvenPushPolicy extends EvolvenCommand implements Runnable {
 
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
+
+    public EvolvenCommandPolicyPush(Command command) {
+        super(command);
+    }
 
     @Override
     public void run() {

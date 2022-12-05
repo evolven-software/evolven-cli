@@ -3,6 +3,7 @@ package com.evolven.httpclient.command;
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
 import com.evolven.common.StringUtils;
+import com.evolven.config.ConfigException;
 import com.evolven.filesystem.EvolvenCliConfig;
 import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.CachedURLBuilder;
@@ -35,11 +36,16 @@ public class PushPolicyCommand extends Command {
 
     @Override
     public void execute() throws CommandException {
-        EvolvenCliConfig config = fileSystemManager.getEvolvenCliConfig();
+        EvolvenCliConfig config = fileSystemManager.getConfig();
+        try {
+            config.setEnvironment();
+        } catch (ConfigException e) {
+            throw new CommandException("Failed to load active environment. " + e.getMessage());
+        }
         String baseUrl = null;
         try {
             baseUrl = CachedURLBuilder.createBaseUrl(config);
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException | ConfigException e) {
             throw new CommandException("Failed to construct base URL. " + e.getMessage());
         }
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
@@ -52,7 +58,12 @@ public class PushPolicyCommand extends Command {
         pushPolicy(evolvenHttpClient, config,  policies);
     }
     private void pushPolicy(EvolvenHttpClient evolvenHttpClient, EvolvenCliConfig config, Map<String, String> policies) throws CommandException {
-        String apiKey = config.getApiKey();
+        String apiKey = null;
+        try {
+            apiKey = config.getApiKey();
+        } catch (ConfigException e) {
+            throw new CommandException("Could not get api key. " + e.getMessage());
+        }
         if (StringUtils.isNullOrBlank(apiKey)) {
             throw new CommandException("Api key not found. Login is required.");
         }

@@ -10,9 +10,14 @@ import java.io.IOException;
 
 public class EvolvenCommand {
     private Command command;
-    void addExecutor(Command command) {
-        this.command = command;
 
+    public EvolvenCommand() {}
+    public EvolvenCommand(Command command) {
+        addExecutor(command);
+    }
+    public EvolvenCommand addExecutor(Command command) {
+        this.command = command;
+        return this;
     }
 
     protected void execute() throws CommandException {

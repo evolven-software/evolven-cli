@@ -1,12 +1,13 @@
 package com.evolven.cli;
 
+import com.evolven.command.Command;
 import com.evolven.command.CommandException;
 import com.evolven.command.InvalidParameterException;
 import picocli.CommandLine;
 import picocli.CommandLine.Spec;
 import picocli.CommandLine.Model.CommandSpec;
 @CommandLine.Command(name = "login", header = "Login and create session key")
-class EvolvenLogin extends EvolvenCommand implements Runnable {
+public class EvolvenCommandLogin extends EvolvenCommand implements Runnable {
 
     @CommandLine.Option(names = {"-U", "--url"}, description = "The full url of the server.")
     String url;
@@ -20,12 +21,11 @@ class EvolvenLogin extends EvolvenCommand implements Runnable {
     @CommandLine.Option(names = {"-H", "--host"}, description = "Password.")
     String host;
 
+    @CommandLine.Option(names = {"-e", "--env"}, defaultValue = "test", description = "Environment label.")
+    String env;
+
     @CommandLine.Option(names = {"-P", "--port"}, description = "Password.")
     Short port;
-
-
-    @CommandLine.Option(names = {"-t", "--timeout"}, defaultValue = "150", description = "The session timeout in seconds (max = 150).")
-    Integer timeout;
 
     @CommandLine.Option(names = {"-C", "--skip-caching"}, description = "Skip caching data.")
     Boolean skipCache;
@@ -35,6 +35,10 @@ class EvolvenLogin extends EvolvenCommand implements Runnable {
 
     @Spec
     CommandSpec spec;
+
+    public EvolvenCommandLogin(Command command) {
+        super(command);
+    }
 
     @Override
     public void run() {
@@ -48,7 +52,7 @@ class EvolvenLogin extends EvolvenCommand implements Runnable {
             addOption(username, this);
             addOption(password, this);
             addOption(host, this);
-            addOption(timeout, this);
+            addOption(env, this);
             addFlag(skipCache, this);
             execute();
 

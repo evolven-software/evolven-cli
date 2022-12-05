@@ -3,6 +3,7 @@ package com.evolven.httpclient.command;
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
 import com.evolven.common.StringUtils;
+import com.evolven.config.ConfigException;
 import com.evolven.filesystem.EvolvenCliConfig;
 import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.CachedURLBuilder;
@@ -20,14 +21,14 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 
-public class GetPoliciesCommand extends Command {
+public class GetPolicyCommand extends Command {
     FileSystemManager fileSystemManager;
     public static final String OPTION_OUTPUT = "output";
     public static final String OPTION_SINGLE_FILENAME = "filename";
     public static final String OPTION_FORMAT = "format";
     public static final String FLAG_FORCE = "force";
 
-    public GetPoliciesCommand(FileSystemManager fileSystemManager) {
+    public GetPolicyCommand(FileSystemManager fileSystemManager) {
         registerOptions(new String[] {
                 OPTION_OUTPUT,
                 OPTION_SINGLE_FILENAME,
@@ -37,7 +38,7 @@ public class GetPoliciesCommand extends Command {
         this.fileSystemManager = fileSystemManager;
     }
 
-    private String createBaseUrl(EvolvenCliConfig config) throws CommandException {
+    private String createBaseUrl(EvolvenCliConfig config) throws CommandException, ConfigException {
         CachedURLBuilder builder = new CachedURLBuilder(config);
         try {
             return builder.build();
@@ -48,14 +49,29 @@ public class GetPoliciesCommand extends Command {
 
     @Override
     public void execute() throws CommandException {
-        EvolvenCliConfig config = fileSystemManager.getEvolvenCliConfig();
-        String baseUrl = createBaseUrl(config);
+        EvolvenCliConfig config = fileSystemManager.getConfig();
+        try {
+            config.setEnvironment();
+        } catch (ConfigException e) {
+            throw new CommandException("Failed to load active environment. " + e.getMessage());
+        }
+        String baseUrl = null;
+        try {
+            baseUrl = createBaseUrl(config);
+        } catch (ConfigException e) {
+            throw new CommandException("Failed to construct server base url. " + e.getMessage());
+        }
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
         getPolicies(evolvenHttpClient, config);
     }
 
     private void getPolicies(EvolvenHttpClient evolvenHttpClient, EvolvenCliConfig config) throws CommandException {
-        String apiKey = config.getApiKey();
+        String apiKey = null;
+        try {
+            apiKey = config.getApiKey();
+        } catch (ConfigException e) {
+            throw new CommandException("Could not get api key. " + e.getMessage());
+        }
         if (StringUtils.isNullOrBlank(apiKey)) {
             throw new CommandException("Api key not found. Login is required.");
         }

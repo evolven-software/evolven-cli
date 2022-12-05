@@ -2,6 +2,7 @@ package com.evolven.httpclient;
 
 import com.evolven.command.InvalidParameterException;
 import com.evolven.common.StringUtils;
+import com.evolven.config.ConfigException;
 import com.evolven.filesystem.EvolvenCliConfig;
 import com.evolven.httpclient.http.URLBuilder;
 
@@ -25,11 +26,11 @@ public class CachedURLBuilder {
     private Map<String, String> params = new HashMap<String, String>();
 
 
-    public static String createBaseUrl(EvolvenCliConfig config) throws MalformedURLException {
+    public static String createBaseUrl(EvolvenCliConfig config) throws MalformedURLException, ConfigException {
         return new CachedURLBuilder(config).build();
     }
 
-    public String build() throws MalformedURLException {
+    public String build() throws MalformedURLException, ConfigException {
         URLBuilder urlBuilder = new URLBuilder();
         if (baseUrl == null) {
             baseUrl = config.getBaseUrl();
@@ -76,19 +77,4 @@ public class CachedURLBuilder {
         }
     }
 
-    public String getBaseUrl() {
-        return null;
-    }
-
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
 }

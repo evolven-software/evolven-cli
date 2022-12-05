@@ -1,5 +1,6 @@
 package com.evolven.cli;
 
+import com.evolven.command.Command;
 import com.evolven.command.CommandException;
 import com.evolven.command.InvalidParameterException;
 import com.evolven.common.PolicyFormat;
@@ -10,7 +11,7 @@ import java.io.IOException;
 
 // defines some commands to show in the list (option/parameters fields omitted for this demo)
 @CommandLine.Command(name = "get-policies", header = "Download all th Evolven policies.")
-class EvolvenGetPolicies extends EvolvenCommand implements Runnable {
+public class EvolvenCommandPolicyPull extends EvolvenCommand implements Runnable {
 
     @CommandLine.Option(names = {"-o", "--output-directory"}, defaultValue = "evolven-policies", description = "The output file/directory. The location will be created.")
     File output;
@@ -30,6 +31,9 @@ class EvolvenGetPolicies extends EvolvenCommand implements Runnable {
 
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
+    public EvolvenCommandPolicyPull(Command command) {
+        super(command);
+    }
 
     @Override
     public void run() {

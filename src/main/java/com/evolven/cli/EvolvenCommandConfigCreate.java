@@ -1,5 +1,6 @@
 package com.evolven.cli;
 
+import com.evolven.command.Command;
 import picocli.CommandLine;
 
 import com.evolven.command.CommandException;
@@ -8,11 +9,14 @@ import com.evolven.command.InternalInvalidParameterException;
 
 @CommandLine.Command(name = "create-config", header = "Creates configuration files in the current working directory " +
         "(use it if other methods filed and the the program assumed to be executed from the current location always")
-public class EvolvenCreateConfig extends EvolvenCommand implements Runnable {
-
+public class EvolvenCommandConfigCreate extends EvolvenCommand implements Runnable {
 
     @CommandLine.Option(names = {"-f", "--force"}, description = "Override the config directory if exists.")
     Boolean force = false;
+
+    public EvolvenCommandConfigCreate(Command command) {
+        super(command);
+    }
 
     @Override
     public void run() {

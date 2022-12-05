@@ -2,6 +2,7 @@ package com.evolven.httpclient;
 
 import com.evolven.command.CommandException;
 import com.evolven.common.StringUtils;
+import com.evolven.config.ConfigException;
 import com.evolven.filesystem.EvolvenCliConfig;
 
 import java.util.Map;
@@ -29,8 +30,8 @@ public class CachedValue {
     public String get(String key, Supplier<String> supplier) {
         try {
             return getOrThrow(key, supplier, null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (Throwable e) {
+            return null;
         }
     }
 

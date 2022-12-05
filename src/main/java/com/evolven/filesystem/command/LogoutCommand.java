@@ -14,7 +14,6 @@ public class LogoutCommand extends Command {
 
     @Override
     public void execute() throws CommandException {
-        this.fileSystemManager.invalidateApiKey();
     }
 
     @Override

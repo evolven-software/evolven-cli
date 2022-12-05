@@ -12,7 +12,7 @@ public class FileSystemManager {
     //TODO remove it from here to CommandLine
     final static int DEFAULT_API_KEY_TIMEOUT = 150;
     final static String CONFIG_DIRECTORY_NAME = ".evolven-cli";
-    final static String CONFIG_NAME = "evolven-cli.config";
+    final static String CONFIG_NAME = "config.yaml";
 
     final static String POLICY_CONFIG_NAME = "policy.yaml";
     public final File configDirectory;
@@ -20,28 +20,11 @@ public class FileSystemManager {
 
     public FileSystemManager() throws IOException {
         configDirectory = getCreateConfigDirectory();
-        configFile = getCreateConfigFile(configDirectory);
-    }
-
-    private static File getCreateFile(File directory, String filename) {
-        File file = new File(directory, filename);
-        if (!file.exists()) {
-            try {
-                FileUtils.createParentDirectories(file);
-                file.createNewFile();
-            } catch (IOException e) {
-                return null;
-            }
-        }
-        return file;
-    }
-
-    private File getCreateConfigFile(File configDirectory) {
-        return getCreateFile(configDirectory, CONFIG_NAME);
+        configFile = new File(configDirectory, CONFIG_NAME);
     }
 
     public EvolvenCliConfig getConfig() {
-        return new EvolvenCliConfig(this);
+        return new EvolvenCliConfig(configFile);
     }
 
     File getCreateConfigDirectoryAtUserHone() {
@@ -89,17 +72,8 @@ public class FileSystemManager {
         return true;
     }
 
-    public EvolvenCliConfig getEvolvenCliConfig() {
-        return new EvolvenCliConfig(this);
-    }
-
-
     public String getApiKey() {
         return null;
-    }
-
-    public void invalidateApiKey() {
-        getEvolvenCliConfig();
     }
 
     public File createConfigDirectory(File configDirectoryParent) {
