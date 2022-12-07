@@ -1,9 +1,7 @@
 package com.evolven.httpclient;
 
-import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.http.HttpClient;
 import com.evolven.httpclient.http.HttpRequestResult;
-import com.evolven.httpclient.http.URLBuilder;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.net.MalformedURLException;
@@ -40,7 +38,7 @@ public class EvolvenHttpClient {
         return HttpClient.post(url, body);
     }
 
-    public HttpRequestResult getPolicies(String apiKey) {
+    public HttpRequestResult getPolicies(String apiKey, EvolvenHttpRequestFilter evolvenHttpRequestFilter) {
         URL url =  null;
         try {
             URIBuilder builder = new URIBuilder(baseUrl);
@@ -54,6 +52,9 @@ public class EvolvenHttpClient {
         Map<String, String> body = Stream.of(new String[][] {
                 {"EvolvenSessionKey", apiKey},
         }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        if (!evolvenHttpRequestFilter.isEmpty()) {
+           body.put(evolvenHttpRequestFilter.getFilterName(), evolvenHttpRequestFilter.getFilterValue());
+        }
         return HttpClient.post(url, body);
     }
 

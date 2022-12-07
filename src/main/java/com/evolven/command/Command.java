@@ -1,6 +1,5 @@
 package com.evolven.command;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -37,7 +36,6 @@ public abstract class Command {
 
     public void addOption(String key, String value) throws InvalidParameterException {
         if (!options.containsKey(key)) throw new InternalInvalidParameterException(key);
-        System.out.println("adding option: " + key + " : " + value);
         options.put(key, value);
     }
 
@@ -53,7 +51,6 @@ public abstract class Command {
 
     public void addFlag(String flag, boolean value) throws InternalInvalidParameterException {
         if (!flags.containsKey(flag)) throw new InternalInvalidParameterException(flag);
-        System.out.println("adding option: " + flag + " : " + value);
         flags.put(flag, value);
     }
 

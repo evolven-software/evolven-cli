@@ -19,6 +19,9 @@ public class EvolvenCommandPolicyPull extends EvolvenCommand implements Runnable
     @CommandLine.Option(names = {"-s", "--single-file"}, defaultValue = "policies", description = "Output to a single file.")
     String filename;
 
+    @CommandLine.Option(names = {"-n", "--policy-name"}, description = "Policy name")
+    String name;
+
     @CommandLine.Option(names = {"-f", "--force"}, description = "Override the file if exists.")
     boolean force;
 
@@ -45,6 +48,7 @@ public class EvolvenCommandPolicyPull extends EvolvenCommand implements Runnable
             addOption(output, this);
             addOption(filename, this);
             addOption(format, this);
+            addOption(name, this);
             addFlag(force, this);
             execute();
         } catch (InvalidParameterException e) {

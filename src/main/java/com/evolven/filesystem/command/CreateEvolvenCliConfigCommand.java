@@ -23,7 +23,7 @@ public class CreateEvolvenCliConfigCommand extends Command {
             throw new CommandException("Failed to create configuration files.");
         }
         try {
-            this.fileSystemManager.getPolicyConfig().createInitialConfigs();
+            this.fileSystemManager.dumpInitialPolicyConfig();
         } catch (IOException e) {
             throw new CommandException("Failed to create initial policy config. " + e.getMessage());
         }

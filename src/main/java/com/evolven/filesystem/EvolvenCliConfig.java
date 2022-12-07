@@ -42,12 +42,10 @@ public class EvolvenCliConfig {
     }
 
     public void setEnvironment(String environment) {
-        System.out.println("setting env: " + environment);
         this.environment = environment;
     }
 
     public void setEnvironment() throws ConfigException {
-        System.out.println("setEnvironment");
         String activeEnvironment = getActiveEnvironment();
         if (activeEnvironment == null) {
             throw new ConfigException("Active Environment is not set (need to login?).");

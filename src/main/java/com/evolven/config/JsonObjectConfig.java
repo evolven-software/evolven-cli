@@ -16,7 +16,6 @@ public class JsonObjectConfig implements Config {
     }
 
     void dump(File file) throws IOException {
-        System.out.println(file.getAbsolutePath());
         YAMLUtils.dump(root, file);
     }
 

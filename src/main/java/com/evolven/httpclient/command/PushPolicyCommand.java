@@ -3,6 +3,7 @@ package com.evolven.httpclient.command;
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
 import com.evolven.common.StringUtils;
+import com.evolven.common.YAMLUtils;
 import com.evolven.config.ConfigException;
 import com.evolven.filesystem.EvolvenCliConfig;
 import com.evolven.filesystem.FileSystemManager;
@@ -10,15 +11,12 @@ import com.evolven.httpclient.CachedURLBuilder;
 import com.evolven.httpclient.EvolvenHttpClient;
 import com.evolven.httpclient.http.HttpRequestResult;
 import com.evolven.policy.PolicyConfig;
+import com.evolven.policy.PolicyConfigFactory;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -81,15 +79,17 @@ public class PushPolicyCommand extends Command {
 
     public Map<String, String> fromYamlFile(String filepath) throws IOException {
         File policyYamlFile = new File(filepath);
-        PolicyConfig policyConfig = new PolicyConfig(fileSystemManager);
-        YAMLMapper mapper = new YAMLMapper();
-        JsonNode rule = mapper.readTree(policyYamlFile);
-        String rule2 = new ObjectMapper().writeValueAsString(rule);
-        return policyConfig.getEditablePolicyFields().stream().filter(f -> rule.get(f) != null).collect(Collectors.toMap(f -> f, f -> rule.get(f).asText()));
+
+        PolicyConfig policyConfig = PolicyConfigFactory.createConfig(fileSystemManager.getPolicyConfigFile());
+        JsonNode rule = YAMLUtils.load(policyYamlFile);
+        return policyConfig.getEditablePolicyFields()
+                .stream()
+                .filter(f -> rule.get(f) != null)
+                .collect(Collectors.toMap(f -> f, f -> rule.get(f).asText()));
     }
 
     @Override
     public String getName() {
-        return "push-policy";
+        return "push";
     }
 }

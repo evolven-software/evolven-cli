@@ -1,6 +1,6 @@
 package com.evolven.filesystem;
 
-import com.evolven.policy.PolicyConfig;
+import com.evolven.policy.PolicyConfigFactory;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -48,7 +48,7 @@ public class FileSystemManager {
 
     public File getCreateConfigDirectory() throws IOException {
         File configDirectory = new File(new File("").getAbsolutePath(), CONFIG_DIRECTORY_NAME);
-        if (configDirectory.exists() && configDirectory.isDirectory() && testConfigDirectory(configDirectory)) {
+        if (configDirectory.exists() && configDirectory.isDirectory()) {
             return configDirectory;
         }
         configDirectory = getCreateConfigDirectoryAtUserHone();
@@ -56,10 +56,19 @@ public class FileSystemManager {
             configDirectory = getCreateConfigDirectoryAtJarLocation();
         }
         if (configDirectory != null && testConfigDirectory(configDirectory)) {
-            getPolicyConfig().createInitialConfigs();
+            PolicyConfigFactory.dumpInitialConfig(new File(configDirectory, POLICY_CONFIG_NAME));
             return configDirectory;
         }
         return null ;
+    }
+
+
+    public void dumpInitialPolicyConfig() throws IOException {
+        PolicyConfigFactory.dumpInitialConfig(getPolicyConfigFile());
+    }
+
+    public File getPolicyConfigFile() {
+        return new File(configDirectory, POLICY_CONFIG_NAME);
     }
 
     private boolean testConfigDirectory(File configDirectory) {
@@ -93,7 +102,6 @@ public class FileSystemManager {
     }
 
     public File createConfigDirectory(File configDirectoryParent, boolean override) {
-        System.out.println("creating config dir at: " + configDirectoryParent.getAbsolutePath());
         if (!configDirectoryParent.exists()) {
             if (!configDirectoryParent.mkdirs()) {
                 System.out.println("failed to create config dir parent at: " + configDirectoryParent.getAbsolutePath());
@@ -118,15 +126,6 @@ public class FileSystemManager {
             return null;
         }
         return configDirectory;
-    }
-
-
-    public File createInitialPolicyConfig(String data) throws IOException {
-        return createNewFile(data, POLICY_CONFIG_NAME);
-    }
-
-    public PolicyConfig getPolicyConfig() {
-        return new PolicyConfig(this);
     }
 
     public File createNewFile(String data, String filename) throws IOException {

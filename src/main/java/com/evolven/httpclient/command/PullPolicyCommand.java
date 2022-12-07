@@ -8,31 +8,34 @@ import com.evolven.filesystem.EvolvenCliConfig;
 import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.CachedURLBuilder;
 import com.evolven.httpclient.EvolvenHttpClient;
+import com.evolven.httpclient.EvolvenHttpRequestFilter;
+import com.evolven.httpclient.PullPolicyResponse;
 import com.evolven.httpclient.http.HttpRequestResult;
+import com.evolven.policy.Policy;
+import com.evolven.policy.PolicyConfigFactory;
+import com.evolven.policy.PolicyWriter;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
+import java.util.Iterator;
 
-public class GetPolicyCommand extends Command {
+public class PullPolicyCommand extends Command {
     FileSystemManager fileSystemManager;
     public static final String OPTION_OUTPUT = "output";
     public static final String OPTION_SINGLE_FILENAME = "filename";
     public static final String OPTION_FORMAT = "format";
+    public static final String OPTION_POLICY_NAME = "name";
     public static final String FLAG_FORCE = "force";
 
-    public GetPolicyCommand(FileSystemManager fileSystemManager) {
+    public PullPolicyCommand(FileSystemManager fileSystemManager) {
         registerOptions(new String[] {
                 OPTION_OUTPUT,
                 OPTION_SINGLE_FILENAME,
                 OPTION_FORMAT,
+                OPTION_POLICY_NAME,
         });
         registerFlag(FLAG_FORCE);
         this.fileSystemManager = fileSystemManager;
@@ -75,7 +78,12 @@ public class GetPolicyCommand extends Command {
         if (StringUtils.isNullOrBlank(apiKey)) {
             throw new CommandException("Api key not found. Login is required.");
         }
-        HttpRequestResult result = evolvenHttpClient.getPolicies(apiKey);
+
+        EvolvenHttpRequestFilter evolvenHttpRequestFilter = new EvolvenHttpRequestFilter();
+        if (!StringUtils.isNullOrBlank(options.get(OPTION_POLICY_NAME))) {
+            evolvenHttpRequestFilter.add("name", options.get(OPTION_POLICY_NAME));
+        }
+        HttpRequestResult result = evolvenHttpClient.getPolicies(apiKey, evolvenHttpRequestFilter);
         if (result.isError()) {
             String errorMsg = "Failed to get policies with the cached details. Login may be required.";
             String reasonPhrase = result.getReasonPhrase();
@@ -84,49 +92,31 @@ public class GetPolicyCommand extends Command {
             }
             throw new CommandException(errorMsg);
         }
-        //System.out.println(result.getContent());;
+        System.out.println("\n\n\n\n\n\n\n\n");
+        System.out.println(result.getContent().substring(0, 255));
+
         try {
-            toYamlFiles(result.getContent());
+            writePolicy(result.getContent());
         } catch (JsonProcessingException e) {
-            System.out.println("ERROR");
             System.out.println(e.getMessage());
         } catch (IOException e) {
-            System.out.println("ERROR");
             System.out.println(e.getMessage());
         }
+        System.out.println("END");
     }
 
-    public void toYamlFiles(String jsonString) throws IOException {
+    public void writePolicy(String jsonString) throws IOException {
         File outputDirectory = new File(options.get(OPTION_OUTPUT));
         Files.createDirectories(outputDirectory.toPath());
-        JsonNode jsonNodeTree = new ObjectMapper().readTree(jsonString);
-        JsonNode rules = jsonNodeTree.get("Next").get("Rule");
-        for (JsonNode rule : rules) {
-            String policyName = rule.get("Name").asText().replaceAll("[^a-zA-Z0-9\\.\\-]", "_"); ;
-            //System.out.println(jsonAsYaml);
-            //System.out.println("Policy name: " + policyName);
-            //System.out.println("------------------------------------------------------------");
-
-            YAMLMapper mapper = new YAMLMapper(YAMLFactory.builder()
-                    .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
-                    .build());
-
-            String yamlString = mapper.writeValueAsString(rule);
-            Files.write(new File(outputDirectory, policyName + ".yaml").toPath(), yamlString.getBytes());
-
-            //YAMLMapper yamlMapper = new YAMLMapper();
-            //yamlMapper.writeValue(System.out, rule);
-            //System.out.println("------------------------------------------------------------");
-
-
-            //System.out.println(yamlMapper.writeValueAsString(rule));
+        PullPolicyResponse pullPolicyResponse = new PullPolicyResponse(jsonString);
+        Iterator<Policy> iterator = pullPolicyResponse.iterator();
+        PolicyConfigFactory policyConfigFactory = new PolicyConfigFactory(fileSystemManager.getPolicyConfigFile());
+        PolicyWriter policyWriter = new PolicyWriter(policyConfigFactory.createConfig());
+        while (iterator.hasNext()) {
+            Policy policy = iterator.next();
+            String fileName = StringUtils.replaceNonPathCompatibleChars(policy.getName()) + ".yaml";
+            policyWriter.write(new File(outputDirectory, fileName), policy);
         }
-
-    }
-    public String asYaml(String jsonString) throws JsonProcessingException  {
-        JsonNode jsonNodeTree = new ObjectMapper().readTree(jsonString);
-        String jsonAsYaml = new YAMLMapper().writeValueAsString(jsonNodeTree);
-        return jsonAsYaml;
     }
 
     @Override
