@@ -12,6 +12,7 @@ import com.evolven.httpclient.CachedURLBuilder;
 import com.evolven.httpclient.CachedValue;
 import com.evolven.httpclient.EvolvenHttpClient;
 import com.evolven.httpclient.http.HttpRequestResult;
+import com.evolven.logging.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -22,6 +23,7 @@ public class LoginCommand extends Command {
 
     FileSystemManager fileSystemManager;
     public static final String OPTION_HOST = "host";
+    public static final String OPTION_SCHEMA = "schema";
     public static final String OPTION_PORT = "port";
     public static final String OPTION_URL = "url";
     public static final String OPTION_USERNAME = "username";
@@ -29,10 +31,11 @@ public class LoginCommand extends Command {
 
     public static final String OPTION_ENV = "env";
     public static final String FLAG_SKIP_CACHING = "skipCache";
+
+    private Logger logger = new Logger(LoginCommand.class.getName());
    public LoginCommand(FileSystemManager fileSystemManager) {
 
        this.fileSystemManager = fileSystemManager;
-
 
        registerOptions(new String[] {
                OPTION_HOST,
@@ -41,33 +44,38 @@ public class LoginCommand extends Command {
                OPTION_USERNAME,
                OPTION_PASSWORD,
                OPTION_ENV,
+               OPTION_SCHEMA,
        });
 
        registerFlag(FLAG_SKIP_CACHING);
    }
 
     private void updateCache(CachedValue cachedValue, EvolvenCliConfig config) {
-           cachedValue.set(OPTION_USERNAME, Errors.rethrow().wrap(config::setUsername));
-           cachedValue.set(OPTION_PASSWORD, Errors.rethrow().wrap(config::setPassword));
-           cachedValue.set(OPTION_HOST, Errors.rethrow().wrap(config::setHost));
-           cachedValue.set(OPTION_URL, Errors.rethrow().wrap(config::setUrl));
+       cachedValue.set(OPTION_USERNAME, Errors.rethrow().wrap(config::setUsername));
+       cachedValue.set(OPTION_HOST, Errors.rethrow().wrap(config::setHost));
+       cachedValue.set(OPTION_URL, Errors.rethrow().wrap(config::setUrl));
+       cachedValue.set(OPTION_SCHEMA, Errors.rethrow().wrap(config::setSchema));
     }
 
     private String createBaseUrl(CachedValue cachedValue, EvolvenCliConfig config) throws CommandException {
-        String host = cachedValue.getOrThrow(
+        CachedURLBuilder builder = new CachedURLBuilder(config);
+        builder.setHost(cachedValue.getOrThrow(
                 OPTION_HOST,
                 Errors.rethrow().wrap(config::getHost),
-                new InvalidParameterException("No host provided."));
-        String port = cachedValue.get(
+                new InvalidParameterException("No host provided.")));
+
+        builder.setPort(cachedValue.get(
                 OPTION_PORT,
-                Errors.rethrow().wrap(config::getPort));
-        CachedURLBuilder builder = new CachedURLBuilder(config);
-        builder.setHost(host);
-        builder.setPort(port);
+                Errors.rethrow().wrap(config::getPort)));
+        builder.setScheme(cachedValue.get(
+                OPTION_HOST,
+                Errors.rethrow().wrap(config::getHost)));
         try {
             return builder.build();
         } catch (MalformedURLException | ConfigException e) {
-            throw new CommandException("Failed to construct base URL. " + e.getMessage());
+            String err = "Failed to construct base URL. " + e.getMessage();
+            logger.error(err);
+            throw new CommandException(err);
         }
     }
 
@@ -77,7 +85,9 @@ public class LoginCommand extends Command {
         try {
             config.setCurrentAndCachedEnvironment(options.get(OPTION_ENV));
         } catch (ConfigException e) {
-            throw new CommandException("Failed to set active environment in the cache. " + e.getMessage());
+            String err = "Failed to set active environment in the cache. " + e.getMessage();
+            logger.error(err);
+            throw new CommandException(err);
         }
 
         CachedValue cachedValue = new CachedValue(options);
@@ -95,11 +105,8 @@ public class LoginCommand extends Command {
                 OPTION_USERNAME,
                 Errors.rethrow().wrap(config::getUsername),
                 new InvalidParameterException("No username provided."));
-        String password = cachedValue.getOrThrow(
-                OPTION_PASSWORD,
-                Errors.rethrow().wrap(config::getPassword),
-                new InvalidParameterException("No password provided."));
-        HttpRequestResult result = evolvenHttpClient.login(username, password);
+
+        HttpRequestResult result = evolvenHttpClient.login(username, options.get(OPTION_PASSWORD));
 
         if (result.isError()) {
             String errorMsg = "Failed to login with the provided/cached details.";
@@ -107,6 +114,7 @@ public class LoginCommand extends Command {
             if (!StringUtils.isNullOrBlank(reasonPhrase)) {
                 errorMsg += " " + reasonPhrase;
             }
+            logger.error(errorMsg);
             throw new CommandException(errorMsg);
         }
         return result;
@@ -125,7 +133,9 @@ public class LoginCommand extends Command {
         try {
             config.setApiKey(apiKey);
         } catch (ConfigException e) {
-            throw new CommandException("Failed to cache api-key. " + e.getMessage());
+            String err = "Failed to cache api-key. " + e.getMessage();
+            logger.error(err);
+            throw new CommandException(err);
         }
     }
 

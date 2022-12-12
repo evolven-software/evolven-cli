@@ -9,7 +9,7 @@ public class Policy {
     private static final String NAME_KEY = "Name";
     private JsonNode policy;
 
-    protected Policy(JsonNode policy) {
+    public Policy(JsonNode policy) {
         this.policy = policy;
     }
 

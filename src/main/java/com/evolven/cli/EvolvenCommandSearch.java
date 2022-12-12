@@ -1,27 +1,31 @@
 package com.evolven.cli;
 
+import com.evolven.filesystem.command.LogoutCommand;
+
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
 import com.evolven.command.InvalidParameterException;
 import picocli.CommandLine;
-import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
+import picocli.CommandLine.Model.CommandSpec;
 
-@CommandLine.Command(name = "logout", header = "Invalidate Evolven credentials")
-public class EvolvenCommandLogout extends EvolvenCommand implements Runnable {
+@CommandLine.Command(name = "search", header = "Search Evolven entity.")
+public class EvolvenCommandSearch extends EvolvenCommand implements Runnable {
 
-    @CommandLine.Option(names = {"-e", "--env"}, defaultValue = "test", description = "Environment label.")
-    String env;
-
-    public EvolvenCommandLogout(Command command) {
-        super(command);
-    }
-
-    @CommandLine.Option(names = {"-h", "--help"}, description = "Show help")
-    boolean help;
+    @CommandLine.Option(names = {"-q", "--query"}, required = true, description = "Evolven search query.")
+    String query;
 
     @Spec
     CommandSpec spec;
+
+    @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
+
+    boolean help;
+
+    public EvolvenCommandSearch(Command command) {
+        super(command);
+
+    }
 
     @Override
     public void run() {
@@ -30,8 +34,9 @@ public class EvolvenCommandLogout extends EvolvenCommand implements Runnable {
             return;
         }
         try {
-            addOption(env, this);
+            addOption(query, this);
             execute();
+
         } catch (InvalidParameterException e) {
             throw new RuntimeException(e);
         } catch (CommandException e) {

@@ -1,11 +1,9 @@
-package com.evolven.httpclient;
+package com.evolven.httpclient.response;
 
 import com.evolven.policy.Policy;
-import com.evolven.policy.PolicyFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import java.util.*;
 
@@ -34,7 +32,6 @@ public class PullPolicyResponse {
         } else {
             iterator = (new ArrayList<>(Arrays.asList(ruleNode))).iterator();
         }
-        ruleNode.iterator();
         final Iterator<JsonNode> finalIterator = iterator;
         return new Iterator<Policy>() {
             @Override
@@ -44,7 +41,7 @@ public class PullPolicyResponse {
 
             @Override
             public Policy next() {
-                return PolicyFactory.createPolicy(finalIterator.next());
+                return new Policy(finalIterator.next());
             }
         };
     }

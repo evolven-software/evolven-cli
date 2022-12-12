@@ -1,26 +1,80 @@
 package com.evolven.policy;
 
-import java.util.Set;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class PolicyConfig {
 
-    private Set<String> editablePolicyFields;
+    private final List<String> editablePolicyFields;
 
-    private boolean parseEditableFieldsOnly = false;
+    private List<String> groupedEditablePolicyFields = null;
+    private final LinkedHashMap<String, List<String>> groupings;
+    private final Map<String, String> comments;
 
-    public PolicyConfig(Set<String> editablePolicyFields) {
-       this.editablePolicyFields = editablePolicyFields;
+    private final boolean skipReadonly;
+    private final boolean appendOriginalPolicyAsComment;
+
+    public PolicyConfig(List<String> editablePolicyFields,
+                        LinkedHashMap<String, List<String>> groupings,
+                        Map<String, String> comments,
+                        boolean skipReadonly,
+                        boolean appendOriginalPolicyAsComment
+                        ) {
+        this.groupings = groupings;
+        this.comments = comments;
+        this.editablePolicyFields = editablePolicyFields;
+        this.skipReadonly = skipReadonly;
+        this.appendOriginalPolicyAsComment = appendOriginalPolicyAsComment;
     }
 
-    public Set<String> getEditablePolicyFields() {
+    boolean hasGroupings() {
+        return groupings.size() > 0;
+    }
+
+    List<String> getGroupedEditablePolicyFields() {
+       if (groupedEditablePolicyFields == null) {
+           Set<String> groupedFields = new LinkedHashSet<>();
+           groupings.keySet().stream().forEach(k -> groupedFields.addAll(groupings.get(k)));
+           groupedFields.addAll(editablePolicyFields);
+           groupedEditablePolicyFields = new ArrayList<>(groupedFields);
+       }
+       return groupedEditablePolicyFields;
+    }
+
+    public List<String> getEditablePolicyFields() {
         return editablePolicyFields;
     }
 
-    public boolean isParseEditableFieldsOnly() {
-        return parseEditableFieldsOnly;
+    public boolean isSkipReadonly() {
+        return skipReadonly;
     }
 
-    public void setParseEditableFieldsOnly(boolean parseEditableFieldsOnly) {
-        this.parseEditableFieldsOnly = parseEditableFieldsOnly;
+    public boolean isAppendOriginalPolicyAsComment() {
+        return appendOriginalPolicyAsComment;
+    }
+
+    public LinkedHashMap<String, List<String>> getGroupings() {
+        return groupings;
+    }
+
+    public Map<String, String> getComments() {
+        return comments;
+    }
+
+    public void print(PrintStream out) {
+        out.println("Groupings:");
+        groupings.keySet().stream().forEach(g -> {
+            out.println(g + ":");
+            groupings.get(g).forEach(f -> out.println("- " + f));
+        });
+
+        out.println("Editable fields:");
+        editablePolicyFields.stream().forEach(f -> out.println("- " + f));
+        out.println("Groupings Comment:");
+        comments.keySet().stream().forEach(k -> out.println(k + ": " + comments.get(k)));
+        out.println("Skip readonly fields: " + isSkipReadonly());
+        out.println("Append original policy as comment: " + isAppendOriginalPolicyAsComment());
     }
 }

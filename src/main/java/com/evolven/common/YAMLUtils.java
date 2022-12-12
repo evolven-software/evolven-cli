@@ -12,8 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.List;
 
 public class YAMLUtils {
 
@@ -33,12 +32,10 @@ public class YAMLUtils {
         return new YAMLMapper().createArrayNode();
     }
 
-    public static ObjectNode createArrayNode(String key, Set<String> values)  {
-        ObjectNode root = createObjectNode();
+    public static ArrayNode createArrayNode(List<String> values)  {
         ArrayNode arrayNode = createArrayNode();
         values.stream().forEach(v -> arrayNode.add(v));
-        root.put(key, arrayNode);
-        return root;
+        return arrayNode;
     }
 
 

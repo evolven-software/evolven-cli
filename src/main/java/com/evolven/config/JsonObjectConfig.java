@@ -28,7 +28,11 @@ public class JsonObjectConfig implements Config {
 
     @Override
     public void set(String key, String value) {
-        root.put(key, value);
+        if (value == null) {
+            root.remove(key);
+        } else {
+            root.put(key, value);
+        }
     }
 
     @Override
@@ -40,6 +44,12 @@ public class JsonObjectConfig implements Config {
 
     @Override
     public void set(String environment, String key, String value) {
-        root.with(environment).put(key, value);
+        if (value == null) {
+            root.with(environment).remove(key);
+        } else {
+            root.with(environment).put(key, value);
+        }
+
     }
+
 }

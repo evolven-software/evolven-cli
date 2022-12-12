@@ -87,8 +87,12 @@ public class EvolvenCliConfig {
     }
 
 
+    public void deleteApiKey(String environment) throws ConfigException {
+        remove(environment, API_KEY_KEY);
+    }
+
+
     public void throwIfNoEnvironment() throws ConfigExceptionInternal {
-        System.out.println("env: " + environment);
         if (StringUtils.isNullOrBlank(environment)) {
             throw new ConfigExceptionInternal("Environment is not set");
         }
@@ -117,6 +121,12 @@ public class EvolvenCliConfig {
             config.set(namespace, key, value);
         }
         if (!initiallyOpened) close();
+    }
+
+    private void remove(String namespace, String key) throws ConfigException {
+        if (StringUtils.isNullOrBlank(key)) return;
+        if (StringUtils.isNullOrBlank(namespace)) return;
+        setInternal(namespace, key, null);
     }
 
     private void set(String namespace, String key, String value) throws ConfigException {
@@ -177,6 +187,16 @@ public class EvolvenCliConfig {
     public void setUrl(String url) throws ConfigException {
         throwIfNoEnvironment();
         set(environment, BASE_URL_KEY, url);
+    }
+
+    public void setSchema(String schema) throws ConfigException {
+        throwIfNoEnvironment();
+        set(environment, SCHEMA_KEY, schema);
+    }
+
+    public String getSchema() throws ConfigException {
+        throwIfNoEnvironment();
+        return get(environment, SCHEMA_KEY);
     }
 
     public String getBaseUrl() throws ConfigException {

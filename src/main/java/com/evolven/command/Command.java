@@ -18,6 +18,10 @@ public abstract class Command {
         Arrays.stream(options).sequential().forEach(option -> this.options.put(option, ""));
     }
 
+    protected void registerOption(String option) {
+        this.options.put(option, "");
+    }
+
     protected void registerFlags(String[] flags) {
         Arrays.stream(flags).sequential().forEach(f -> this.flags.put(f, false));
     }

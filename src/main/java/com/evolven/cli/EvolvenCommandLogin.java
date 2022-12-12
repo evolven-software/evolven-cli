@@ -15,11 +15,14 @@ public class EvolvenCommandLogin extends EvolvenCommand implements Runnable {
     @CommandLine.Option(names = {"-u", "--username"}, description = "Username.")
     String username;
 
-    @CommandLine.Option(names = {"-p", "--password"}, /* required = true,*/ description = "Password.")
+    @CommandLine.Option(names = {"-p", "--password"}, required = true, description = "Password.")
     String password;
 
-    @CommandLine.Option(names = {"-H", "--host"}, description = "Password.")
+    @CommandLine.Option(names = {"-H", "--host"}, description = "Host.")
     String host;
+
+    @CommandLine.Option(names = {"-s", "--schema"}, defaultValue = "https", description = "The url schema (ex.: https).")
+    String schema;
 
     @CommandLine.Option(names = {"-e", "--env"}, defaultValue = "test", description = "Environment label.")
     String env;
@@ -52,6 +55,7 @@ public class EvolvenCommandLogin extends EvolvenCommand implements Runnable {
             addOption(username, this);
             addOption(password, this);
             addOption(host, this);
+            addOption(schema, this);
             addOption(env, this);
             addFlag(skipCache, this);
             execute();

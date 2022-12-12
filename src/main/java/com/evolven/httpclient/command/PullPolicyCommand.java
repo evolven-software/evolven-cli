@@ -9,12 +9,13 @@ import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.CachedURLBuilder;
 import com.evolven.httpclient.EvolvenHttpClient;
 import com.evolven.httpclient.EvolvenHttpRequestFilter;
-import com.evolven.httpclient.PullPolicyResponse;
+import com.evolven.httpclient.response.PullPolicyResponse;
 import com.evolven.httpclient.http.HttpRequestResult;
 import com.evolven.policy.Policy;
 import com.evolven.policy.PolicyConfigFactory;
 import com.evolven.policy.PolicyWriter;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,7 +79,6 @@ public class PullPolicyCommand extends Command {
         if (StringUtils.isNullOrBlank(apiKey)) {
             throw new CommandException("Api key not found. Login is required.");
         }
-
         EvolvenHttpRequestFilter evolvenHttpRequestFilter = new EvolvenHttpRequestFilter();
         if (!StringUtils.isNullOrBlank(options.get(OPTION_POLICY_NAME))) {
             evolvenHttpRequestFilter.add("name", options.get(OPTION_POLICY_NAME));
@@ -92,9 +92,6 @@ public class PullPolicyCommand extends Command {
             }
             throw new CommandException(errorMsg);
         }
-        System.out.println("\n\n\n\n\n\n\n\n");
-        System.out.println(result.getContent().substring(0, 255));
-
         try {
             writePolicy(result.getContent());
         } catch (JsonProcessingException e) {
@@ -102,11 +99,19 @@ public class PullPolicyCommand extends Command {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-        System.out.println("END");
     }
 
-    public void writePolicy(String jsonString) throws IOException {
+    public void writePolicy(String jsonString) throws IOException, CommandException {
         File outputDirectory = new File(options.get(OPTION_OUTPUT));
+        if (outputDirectory.exists()) {
+            if (!outputDirectory.isDirectory()) {
+                throw new CommandException("Invalid output location (the location exits and it is not a directory): "
+                       + outputDirectory.toPath());
+            }
+            if (flags.get(FLAG_FORCE)) {
+                FileUtils.deleteDirectory(outputDirectory);
+            }
+        }
         Files.createDirectories(outputDirectory.toPath());
         PullPolicyResponse pullPolicyResponse = new PullPolicyResponse(jsonString);
         Iterator<Policy> iterator = pullPolicyResponse.iterator();
@@ -121,6 +126,6 @@ public class PullPolicyCommand extends Command {
 
     @Override
     public String getName() {
-        return "get-policies";
+        return "pull";
     }
 }

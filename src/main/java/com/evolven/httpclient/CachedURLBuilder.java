@@ -61,6 +61,7 @@ public class CachedURLBuilder {
     }
 
     public void setScheme(String scheme) {
+        if (StringUtils.isNullOrBlank(scheme)) return;
         this.scheme = scheme;
     }
 

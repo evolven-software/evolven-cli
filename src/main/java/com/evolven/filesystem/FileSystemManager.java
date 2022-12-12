@@ -1,5 +1,7 @@
 package com.evolven.filesystem;
 
+import com.evolven.logging.Logger;
+import com.evolven.logging.LoggerManager;
 import com.evolven.policy.PolicyConfigFactory;
 import org.apache.commons.io.FileUtils;
 
@@ -9,18 +11,56 @@ import java.nio.file.Files;
 
 public class FileSystemManager {
 
-    //TODO remove it from here to CommandLine
-    final static int DEFAULT_API_KEY_TIMEOUT = 150;
     final static String CONFIG_DIRECTORY_NAME = ".evolven-cli";
     final static String CONFIG_NAME = "config.yaml";
 
-    final static String POLICY_CONFIG_NAME = "policy.yaml";
+    final static String POLICY_CONFIG_NAME = "policy-config.yaml";
+    final static String LOGGER_DIRECTORY = "log";
     public final File configDirectory;
     public final File configFile;
 
+    private Logger logger;
+
     public FileSystemManager() throws IOException {
         configDirectory = getCreateConfigDirectory();
+        LoggerManager.createInstance(getCreateLoggerDirectory());
+        logger = new Logger(FileSystemManager.class.getName());
         configFile = new File(configDirectory, CONFIG_NAME);
+        dumpInitialPolicyConfig(false);
+    }
+
+
+    private void info(String log) {
+        if (logger != null) {
+            logger.info(log);
+        }
+    }
+
+    private void debug(String log) {
+        if (logger != null) {
+            logger.debug(log);
+        }
+    }
+
+    private void error(String log) {
+        if (logger != null) {
+            logger.error(log);
+        } else {
+            System.err.println(log);
+        }
+
+    }
+
+    public File getCreateLoggerDirectory() throws IOException {
+        File logDir = new File(configDirectory, LOGGER_DIRECTORY);
+
+        if (logDir.exists() && !logDir.isDirectory()) {
+            throw new IOException("Logging directory name occupied by a file.");
+        }
+        if (!logDir.exists()) {
+           Files.createDirectories(logDir.toPath());
+        }
+        return logDir;
     }
 
     public EvolvenCliConfig getConfig() {
@@ -29,7 +69,10 @@ public class FileSystemManager {
 
     File getCreateConfigDirectoryAtUserHone() {
         File userDirectory = FileUtils.getUserDirectory();
-        if (!userDirectory.exists() || !userDirectory.isDirectory()) return null;
+        if (!userDirectory.exists() || !userDirectory.isDirectory()) {
+            error("File with the name " + userDirectory + " exists (expected user home directory).");
+            return null;
+        }
         File configDirectory = new File(userDirectory, CONFIG_DIRECTORY_NAME);
         if (!configDirectory.exists()) {
             if (!configDirectory.mkdir()) return null;
@@ -56,15 +99,23 @@ public class FileSystemManager {
             configDirectory = getCreateConfigDirectoryAtJarLocation();
         }
         if (configDirectory != null && testConfigDirectory(configDirectory)) {
-            PolicyConfigFactory.dumpInitialConfig(new File(configDirectory, POLICY_CONFIG_NAME));
             return configDirectory;
         }
         return null ;
     }
 
 
+    public void dumpInitialPolicyConfig(boolean override) throws IOException {
+        File policyConfigFile = getPolicyConfigFile();
+        if (policyConfigFile.exists() && !override) {
+            info("Policy config file exists and was not overridden.");
+            return;
+        }
+        PolicyConfigFactory.dumpInitialConfig(policyConfigFile);
+    }
+
     public void dumpInitialPolicyConfig() throws IOException {
-        PolicyConfigFactory.dumpInitialConfig(getPolicyConfigFile());
+        dumpInitialPolicyConfig(true);
     }
 
     public File getPolicyConfigFile() {
@@ -104,7 +155,7 @@ public class FileSystemManager {
     public File createConfigDirectory(File configDirectoryParent, boolean override) {
         if (!configDirectoryParent.exists()) {
             if (!configDirectoryParent.mkdirs()) {
-                System.out.println("failed to create config dir parent at: " + configDirectoryParent.getAbsolutePath());
+                System.err.println("failed to create config dir parent at: " + configDirectoryParent.getAbsolutePath());
                 //TODO log
                 return null;
             }

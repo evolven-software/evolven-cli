@@ -160,7 +160,6 @@ public class HttpClient {
                 InputStream inputStream = entity2.getContent();
                 String result = new BufferedReader(new InputStreamReader(inputStream))
                         .lines().collect(Collectors.joining("\n"));
-                System.out.println(result);
                 EntityUtils.consume(entity2);
             }
         } catch (IOException e) {
@@ -177,7 +176,6 @@ public class HttpClient {
                 UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nvps);
                 String input = new BufferedReader(new InputStreamReader(urlEncodedFormEntity.getContent()))
                         .lines().collect(Collectors.joining("&"));
-                System.out.println("Input: " + input);
                 httpPost.setEntity(urlEncodedFormEntity);
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);

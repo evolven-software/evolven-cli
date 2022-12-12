@@ -5,11 +5,14 @@ import com.evolven.command.CommandException;
 import com.evolven.command.InvalidParameterException;
 import picocli.CommandLine;
 
-@CommandLine.Command(name = "push-policy", header = "Upload an Evolven policy")
-public class EvolvenCommandPolicyPush extends EvolvenCommand implements Runnable {
+@CommandLine.Command(name = "test", header = "Upload an Evolven policy")
+public class EvolvenCommandPolicyTest extends EvolvenCommand implements Runnable {
 
     @CommandLine.Option(names = {"-f", "--policy-file"}, required = true, description = "Path to a policy file.")
     String filename;
+
+    @CommandLine.Option(names = {"-c", "--criterion"}, description = "The policy will be tested on the environments that answer this search criterion.")
+    String query;
 
     @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
     boolean help;
@@ -17,7 +20,7 @@ public class EvolvenCommandPolicyPush extends EvolvenCommand implements Runnable
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
 
-    public EvolvenCommandPolicyPush(Command command) {
+    public EvolvenCommandPolicyTest(Command command) {
         super(command);
     }
 
@@ -29,6 +32,7 @@ public class EvolvenCommandPolicyPush extends EvolvenCommand implements Runnable
         }
         try {
             addOption(filename, this);
+            addOption(query, this);
             execute();
         } catch (InvalidParameterException e) {
             throw new RuntimeException(e);
