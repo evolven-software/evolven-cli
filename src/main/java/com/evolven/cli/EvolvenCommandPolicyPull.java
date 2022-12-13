@@ -9,8 +9,7 @@ import picocli.CommandLine;
 import java.io.File;
 import java.io.IOException;
 
-// defines some commands to show in the list (option/parameters fields omitted for this demo)
-@CommandLine.Command(name = "get-policies", header = "Download all th Evolven policies.")
+@CommandLine.Command(name = "pull", header = "Download Evolven policy.")
 public class EvolvenCommandPolicyPull extends EvolvenCommand implements Runnable {
 
     @CommandLine.Option(names = {"-o", "--output-directory"}, defaultValue = "evolven-policies", description = "The output file/directory. The location will be created.")
@@ -55,18 +54,8 @@ public class EvolvenCommandPolicyPull extends EvolvenCommand implements Runnable
             addFlag(comment, this);
             addFlag(force, this);
             execute();
-        } catch (InvalidParameterException e) {
-            throw new RuntimeException(e);
         } catch (CommandException e) {
             throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
-    }
-
-    enum OutputFormat {
-        JSON,
-        YAML,
-        ROW
     }
 }

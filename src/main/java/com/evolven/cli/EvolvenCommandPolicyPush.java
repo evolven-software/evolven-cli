@@ -30,8 +30,6 @@ public class EvolvenCommandPolicyPush extends EvolvenCommand implements Runnable
         try {
             addOption(filename, this);
             execute();
-        } catch (InvalidParameterException e) {
-            throw new RuntimeException(e);
         } catch (CommandException e) {
             throw new RuntimeException(e);
         }

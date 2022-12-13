@@ -2,6 +2,7 @@ package com.evolven.cli;
 
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
+import com.evolven.command.InternalInvalidParameterException;
 import com.evolven.command.InvalidParameterException;
 import picocli.CommandLine;
 import picocli.CommandLine.Spec;
@@ -59,11 +60,8 @@ public class EvolvenCommandLogin extends EvolvenCommand implements Runnable {
             addOption(env, this);
             addFlag(skipCache, this);
             execute();
-
-        } catch (InvalidParameterException e) {
-            throw new RuntimeException(e);
         } catch (CommandException e) {
-            throw new RuntimeException(e);
+            throw new EvolvenCommandException(e);
         }
     }
 }

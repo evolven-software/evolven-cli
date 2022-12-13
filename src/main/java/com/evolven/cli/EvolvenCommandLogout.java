@@ -32,10 +32,8 @@ public class EvolvenCommandLogout extends EvolvenCommand implements Runnable {
         try {
             addOption(env, this);
             execute();
-        } catch (InvalidParameterException e) {
-            throw new RuntimeException(e);
         } catch (CommandException e) {
-            throw new RuntimeException(e);
+            throw new EvolvenCommandException(e);
         }
     }
 }

@@ -1,16 +1,20 @@
 package com.evolven.logging;
 
-import java.util.ResourceBundle;
 import java.util.logging.*;
 
 public class Logger {
     protected java.util.logging.Logger info;
     protected java.util.logging.Logger debug;
 
+    public Logger(Object obj) {
+        this(obj.getClass().getName());
+    }
+
     public Logger(String name) {
         info = java.util.logging.Logger.getLogger(name);
         debug = java.util.logging.Logger.getLogger(name);
-        LoggerManager.getInstance().initializeLogger(this);
+        LoggerManager instance = LoggerManager.getInstance();
+        if (instance != null) instance.initializeLogger(this);
     }
 
     public void info(String info) {

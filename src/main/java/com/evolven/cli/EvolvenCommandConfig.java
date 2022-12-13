@@ -8,21 +8,11 @@ import picocli.CommandLine;
 import picocli.CommandLine.Spec;
 import picocli.CommandLine.Model.CommandSpec;
 
-@CommandLine.Command(name = "config", header = "Group of commands related to the configurations")
-public class EvolvenCommandConfig {
-
-    @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
-    boolean help;
-
-    @Spec
-    CommandSpec spec;
-
-    public void run() {
-        if (help) {
-            spec.commandLine().usage(System.out);
-            return;
-        }
-        spec.commandLine().usage(System.err);
-    }
-
+@CommandLine.Command(
+        name = EvolvenCommandConfig.COMMAND_NAME,
+        header = "Group of commands related to the configurations",
+        footer = "%nUse 'evolven " + EvolvenCommandPolicy.COMMAND_NAME + " <command> --help' to read about a specific subcommand or concept."
+)
+public class EvolvenCommandConfig extends EvolvenCommandsGroup {
+    public static final String COMMAND_NAME = "config";
 }

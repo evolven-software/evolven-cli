@@ -44,9 +44,13 @@ public class EvolvenCommand {
         command.addOption(getFieldName(option, parent), Short.toString(option));
     }
 
-    void addOption(File option, Object parent) throws InvalidParameterException, IOException {
+    void addOption(File option, Object parent) throws InvalidParameterException {
         if (option == null) return;
-        command.addOption(getFieldName(option, parent), option.getCanonicalPath());
+        try {
+            command.addOption(getFieldName(option, parent), option.getCanonicalPath());
+        } catch (IOException e) {
+            throw new InvalidParameterException("Can't convert the path " + option.getPath() +  " to canonical path.");
+        }
     }
 
     void addOption(Integer option, Object parent) throws InvalidParameterException {

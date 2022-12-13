@@ -2,7 +2,6 @@ package com.evolven.cli;
 
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
-import com.evolven.command.InvalidParameterException;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "test", header = "Upload an Evolven policy")
@@ -34,10 +33,8 @@ public class EvolvenCommandPolicyTest extends EvolvenCommand implements Runnable
             addOption(filename, this);
             addOption(query, this);
             execute();
-        } catch (InvalidParameterException e) {
-            throw new RuntimeException(e);
         } catch (CommandException e) {
-            throw new RuntimeException(e);
+            throw new EvolvenCommandException(e);
         }
     }
 }
