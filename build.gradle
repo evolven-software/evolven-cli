@@ -50,6 +50,12 @@ task copyAllDependencies(type: Copy) {
 }
 build.dependsOn(copyAllDependencies)
 
+task copyLaunchers(type: Copy) {
+    from "${rootDir}/evolven.bat"
+    from "${rootDir}/evolven.ps1"
+    into "${buildDir}/output/bin/"
+}
+build.dependsOn(copyLaunchers)
 
 test {
     useJUnitPlatform()
