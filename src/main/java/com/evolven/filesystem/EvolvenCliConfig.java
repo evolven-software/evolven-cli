@@ -163,7 +163,7 @@ public class EvolvenCliConfig {
         return value;
     }
 
-    private String get(String key) throws ConfigException {
+    public String get(String key) throws ConfigException {
         if (StringUtils.isNullOrBlank(key)) return null;
         return getInternal(null, key);
     }
