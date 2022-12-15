@@ -9,4 +9,14 @@ public class CommandException extends Exception {
         super(msg);
         logger.error(msg);
     }
+
+    public CommandException(String msg, Exception e) {
+        super(msg + "\n" + msg);
+        logger.error(msg + "\n" + msg);
+    }
+
+    public CommandException(Exception e) {
+        super(e);
+        logger.error(e.getMessage());
+    }
 }

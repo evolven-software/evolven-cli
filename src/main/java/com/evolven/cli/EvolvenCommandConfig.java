@@ -1,12 +1,6 @@
 package com.evolven.cli;
 
-import com.evolven.command.Command;
-import com.evolven.command.CommandException;
-import com.evolven.command.InvalidParameterException;
-import com.evolven.filesystem.FileSystemManager;
 import picocli.CommandLine;
-import picocli.CommandLine.Spec;
-import picocli.CommandLine.Model.CommandSpec;
 
 @CommandLine.Command(
         name = EvolvenCommandConfig.COMMAND_NAME,

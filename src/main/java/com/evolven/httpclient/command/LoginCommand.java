@@ -28,10 +28,8 @@ public class LoginCommand extends Command {
     public static final String OPTION_URL = "url";
     public static final String OPTION_USERNAME = "username";
     public static final String OPTION_PASSWORD = "password";
-
     public static final String OPTION_ENV = "env";
     public static final String FLAG_SKIP_CACHING = "skipCache";
-
     private Logger logger = new Logger(LoginCommand.class.getName());
    public LoginCommand(FileSystemManager fileSystemManager) {
 
@@ -82,12 +80,25 @@ public class LoginCommand extends Command {
     @Override
     public void execute() throws CommandException {
         EvolvenCliConfig config = fileSystemManager.getConfig();
+        String env = options.get(OPTION_ENV);
+        if (StringUtils.isNullOrBlank(env)) {
+            try {
+                env = config.getActiveEnvironment();
+            } catch (ConfigException e) {}
+        }
+
+        if (StringUtils.isNullOrBlank(env)) {
+            throwCommandException("No cached environment value (use \"env\" option).");
+        }
+
+        if (config.ENVIRONMENT_KEY == env) {
+            throwCommandException("Illegal environment name: " + env);
+        }
+
         try {
-            config.setCurrentAndCachedEnvironment(options.get(OPTION_ENV));
+            config.setCurrentAndCachedEnvironment(env);
         } catch (ConfigException e) {
-            String err = "Failed to set active environment in the cache. " + e.getMessage();
-            logger.error(err);
-            throw new CommandException(err);
+            throwCommandException("Failed to set active environment in the cache. " + e.getMessage());
         }
 
         CachedValue cachedValue = new CachedValue(options);
@@ -98,6 +109,11 @@ public class LoginCommand extends Command {
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
         HttpRequestResult result = login(evolvenHttpClient, cachedValue, config);
         cacheApiKey(result, config);
+    }
+
+    private void throwCommandException(String err) throws CommandException {
+        logger.error(err);
+        throw new CommandException(err);
     }
 
     private HttpRequestResult login(EvolvenHttpClient evolvenHttpClient, CachedValue cachedValue, EvolvenCliConfig config) throws CommandException {
@@ -114,8 +130,7 @@ public class LoginCommand extends Command {
             if (!StringUtils.isNullOrBlank(reasonPhrase)) {
                 errorMsg += " " + reasonPhrase;
             }
-            logger.error(errorMsg);
-            throw new CommandException(errorMsg);
+            throwCommandException(errorMsg);
         }
         return result;
     }
@@ -126,16 +141,14 @@ public class LoginCommand extends Command {
         try {
             jsonObject = (JSONObject) parser.parse(result.getContent());
         } catch (ParseException e) {
-            throw new CommandException("Failed to parse server's response. " + e.getMessage());
+            throwCommandException("Failed to parse server's response. " + e.getMessage());
         }
         JSONObject next = (JSONObject) jsonObject.get("Next");
         String apiKey = (String) next.get("ID");
         try {
             config.setApiKey(apiKey);
         } catch (ConfigException e) {
-            String err = "Failed to cache api-key. " + e.getMessage();
-            logger.error(err);
-            throw new CommandException(err);
+            throwCommandException("Failed to cache api-key. " + e.getMessage());
         }
     }
 

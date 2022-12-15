@@ -55,7 +55,7 @@ public class EvolvenCommandPolicyPull extends EvolvenCommand implements Runnable
             addFlag(force, this);
             execute();
         } catch (CommandException e) {
-            throw new RuntimeException(e);
+            throw new EvolvenCommandException(e);
         }
     }
 }

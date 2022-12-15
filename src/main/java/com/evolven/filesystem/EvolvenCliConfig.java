@@ -10,14 +10,13 @@ import java.io.IOException;
 
 public class EvolvenCliConfig {
     private static final String USERNAME_KEY = "username";
-    private static final String PASSWORD_KEY = "password";
     private static final String HOST_KEY = "host";
     private static final String PORT_KEY = "port";
     private static final String SCHEMA_KEY = "schema";
     private static final String BASE_URL_KEY = "base-url";
 
     private static final String API_KEY_KEY = "api-key";
-    private static final String ENVIRONMENT_KEY = "active-env";
+    public static final String ENVIRONMENT_KEY = "active-env";
     File yamlFile;
 
     YAMLFileConfig config;
@@ -42,7 +41,9 @@ public class EvolvenCliConfig {
     }
 
     public void setEnvironment(String environment) {
-        this.environment = environment;
+        if (!StringUtils.isNullOrBlank(environment)) {
+            this.environment = environment;
+        }
     }
 
     public void setEnvironment() throws ConfigException {
@@ -108,8 +109,10 @@ public class EvolvenCliConfig {
         return get(environment, API_KEY_KEY);
     }
 
-    private void set(String key, String value) throws ConfigException {
-        set(null, key, value);
+    public void set(String key, String value) throws ConfigException {
+        if (StringUtils.isNullOrBlank(value)) return;
+        if (StringUtils.isNullOrBlank(value)) return;
+        setInternal(null, key, value);
     }
 
     private void setInternal(String namespace, String key, String value) throws ConfigException {
@@ -123,20 +126,25 @@ public class EvolvenCliConfig {
         if (!initiallyOpened) close();
     }
 
-    private void remove(String namespace, String key) throws ConfigException {
+    public void remove(String key) throws ConfigException {
+        if (StringUtils.isNullOrBlank(key)) return;
+        setInternal(null, key, null);
+    }
+
+    public void remove(String namespace, String key) throws ConfigException {
         if (StringUtils.isNullOrBlank(key)) return;
         if (StringUtils.isNullOrBlank(namespace)) return;
         setInternal(namespace, key, null);
     }
 
-    private void set(String namespace, String key, String value) throws ConfigException {
+    public void set(String namespace, String key, String value) throws ConfigException {
         if (StringUtils.isNullOrBlank(key)) return;
         if (StringUtils.isNullOrBlank(value)) return;
         if (StringUtils.isNullOrBlank(namespace)) return;
         setInternal(namespace, key, value);
     }
 
-    private String get(String namespace, String key) throws ConfigException {
+    public String get(String namespace, String key) throws ConfigException {
         if (StringUtils.isNullOrBlank(key)) return null;
         if (StringUtils.isNullOrBlank(namespace)) return null;
         return getInternal(namespace, key);
@@ -212,16 +220,6 @@ public class EvolvenCliConfig {
     public String getPort() throws ConfigException {
         throwIfNoEnvironment();
         return get(environment, PORT_KEY);
-    }
-
-    public String getPassword() throws ConfigException {
-        throwIfNoEnvironment();
-        return get(environment, PASSWORD_KEY);
-    }
-
-    public void setPassword(String password) throws ConfigException {
-        throwIfNoEnvironment();
-        set(environment, PASSWORD_KEY, password);
     }
 
 }
