@@ -3,15 +3,20 @@ package com.evolven.httpclient.http;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-public class HttpRequestResult {
+public class HttpRequestResult implements IHttpRequestResult {
 
     private int statusCode;
     private String reasonPhrase;
     private String content;
-    protected HttpRequestResult(int statusCode, String reasonPhrase, String content) {
+    public HttpRequestResult(int statusCode, String reasonPhrase, String content) {
         this.statusCode = statusCode;
         this.reasonPhrase = reasonPhrase;
         this.content = content;
+    }
+
+    public HttpRequestResult(String msg) {
+        this.statusCode = -1;
+        this.reasonPhrase = msg;
     }
 
     public boolean isSuccess() {
@@ -37,10 +42,6 @@ public class HttpRequestResult {
         }
     }
 
-    public HttpRequestResult(String msg) {
-        this.statusCode = -1;
-        this.reasonPhrase = msg;
-    }
 
     public int getStatusCode() {
         return statusCode;

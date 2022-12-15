@@ -9,9 +9,9 @@ import com.evolven.filesystem.EvolvenCliConfig;
 import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.CachedURLBuilder;
 import com.evolven.httpclient.EvolvenHttpClient;
+import com.evolven.httpclient.http.IHttpRequestResult;
 import com.evolven.httpclient.model.BenchmarkResult;
 import com.evolven.httpclient.response.SearchEnvironmentResponse;
-import com.evolven.httpclient.http.HttpRequestResult;
 import com.evolven.httpclient.model.Environment;
 import com.evolven.httpclient.response.TestEnvironmentResponse;
 import com.evolven.policy.PolicyConfig;
@@ -74,7 +74,7 @@ public class TestPolicyCommand extends Command {
             throw new CommandException("Api key not found. Login is required.");
         }
 
-        HttpRequestResult result = evolvenHttpClient.search(apiKey, query);
+        IHttpRequestResult result = evolvenHttpClient.search(apiKey, query);
         if (result.isError()) {
             String errorMsg = "Failed to get policies with the cached details. Login may be required.";
             String reasonPhrase = result.getReasonPhrase();
@@ -83,6 +83,7 @@ public class TestPolicyCommand extends Command {
             }
             throw new CommandException(errorMsg);
         }
+        System.out.println(result.getContent());
         SearchEnvironmentResponse response = new SearchEnvironmentResponse(result.getContent());
         Iterator<Environment> envIterator = response.iterator();
 

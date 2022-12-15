@@ -9,8 +9,8 @@ import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.CachedURLBuilder;
 import com.evolven.httpclient.EvolvenHttpClient;
 import com.evolven.httpclient.EvolvenHttpRequestFilter;
+import com.evolven.httpclient.http.IHttpRequestResult;
 import com.evolven.httpclient.response.PullPolicyResponse;
-import com.evolven.httpclient.http.HttpRequestResult;
 import com.evolven.policy.Policy;
 import com.evolven.policy.PolicyConfigFactory;
 import com.evolven.policy.PolicyWriter;
@@ -83,7 +83,7 @@ public class PullPolicyCommand extends Command {
         if (!StringUtils.isNullOrBlank(options.get(OPTION_POLICY_NAME))) {
             evolvenHttpRequestFilter.add("name", options.get(OPTION_POLICY_NAME));
         }
-        HttpRequestResult result = evolvenHttpClient.getPolicies(apiKey, evolvenHttpRequestFilter);
+        IHttpRequestResult result = evolvenHttpClient.getPolicies(apiKey, evolvenHttpRequestFilter);
         if (result.isError()) {
             String errorMsg = "Failed to get policies with the cached details. Login may be required.";
             String reasonPhrase = result.getReasonPhrase();

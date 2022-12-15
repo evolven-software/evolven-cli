@@ -9,7 +9,7 @@ import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.CachedURLBuilder;
 import com.evolven.httpclient.EvolvenHttpClient;
 import com.evolven.httpclient.response.SearchEnvironmentResponse;
-import com.evolven.httpclient.http.HttpRequestResult;
+import com.evolven.httpclient.http.IHttpRequestResult;
 import com.evolven.httpclient.model.Environment;
 
 import java.net.MalformedURLException;
@@ -60,7 +60,7 @@ public class SearchCommand extends Command {
         if (StringUtils.isNullOrBlank(apiKey)) {
             throw new CommandException("Api key not found. Login is required.");
         }
-        HttpRequestResult result = evolvenHttpClient.search(apiKey, query);
+        IHttpRequestResult result = evolvenHttpClient.search(apiKey, query);
         if (result.isError()) {
             String errorMsg = "Failed to get policies with the cached details. Login may be required.";
             String reasonPhrase = result.getReasonPhrase();

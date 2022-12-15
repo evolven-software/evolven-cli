@@ -11,7 +11,7 @@ import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.CachedURLBuilder;
 import com.evolven.httpclient.CachedValue;
 import com.evolven.httpclient.EvolvenHttpClient;
-import com.evolven.httpclient.http.HttpRequestResult;
+import com.evolven.httpclient.http.IHttpRequestResult;
 import com.evolven.logging.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -107,7 +107,7 @@ public class LoginCommand extends Command {
         }
         String baseUrl = createBaseUrl(cachedValue, config);
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
-        HttpRequestResult result = login(evolvenHttpClient, cachedValue, config);
+        IHttpRequestResult result = login(evolvenHttpClient, cachedValue, config);
         cacheApiKey(result, config);
     }
 
@@ -116,13 +116,13 @@ public class LoginCommand extends Command {
         throw new CommandException(err);
     }
 
-    private HttpRequestResult login(EvolvenHttpClient evolvenHttpClient, CachedValue cachedValue, EvolvenCliConfig config) throws CommandException {
+    private IHttpRequestResult login(EvolvenHttpClient evolvenHttpClient, CachedValue cachedValue, EvolvenCliConfig config) throws CommandException {
         String username = cachedValue.getOrThrow(
                 OPTION_USERNAME,
                 Errors.rethrow().wrap(config::getUsername),
                 new InvalidParameterException("No username provided."));
 
-        HttpRequestResult result = evolvenHttpClient.login(username, options.get(OPTION_PASSWORD));
+        IHttpRequestResult result = evolvenHttpClient.login(username, options.get(OPTION_PASSWORD));
 
         if (result.isError()) {
             String errorMsg = "Failed to login with the provided/cached details.";
@@ -135,7 +135,7 @@ public class LoginCommand extends Command {
         return result;
     }
 
-    private void cacheApiKey(HttpRequestResult result, EvolvenCliConfig config) throws CommandException {
+    private void cacheApiKey(IHttpRequestResult result, EvolvenCliConfig config) throws CommandException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = null;
         try {

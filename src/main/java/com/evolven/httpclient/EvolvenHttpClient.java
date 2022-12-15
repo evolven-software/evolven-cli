@@ -2,7 +2,7 @@ package com.evolven.httpclient;
 
 import com.evolven.common.StringUtils;
 import com.evolven.httpclient.http.HttpClient;
-import com.evolven.httpclient.http.HttpRequestResult;
+import com.evolven.httpclient.http.IHttpRequestResult;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.net.MalformedURLException;
@@ -19,7 +19,7 @@ public class EvolvenHttpClient {
         this.baseUrl = baseUrl;
     }
 
-    public HttpRequestResult login(String user, String password) {
+    public IHttpRequestResult login(String user, String password) {
         URL url =  null;
         try {
             URIBuilder builder = new URIBuilder(baseUrl);
@@ -27,7 +27,7 @@ public class EvolvenHttpClient {
             builder.setParameter("action", "login");
             url = builder.build().toURL();
         } catch (URISyntaxException | MalformedURLException e) {
-            return new HttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
+            return new EvolvenHttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
         }
         Map<String, String> body = Stream.of(new String[][] {
                 {"json", "true"},
@@ -36,10 +36,10 @@ public class EvolvenHttpClient {
                 {"isEncrypted", "false"},
                 {"ForceIP", "true"},
         }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
-        return HttpClient.post(url, body);
+        return post(url, body);
     }
 
-    public HttpRequestResult getPolicies(String apiKey, EvolvenHttpRequestFilter evolvenHttpRequestFilter) {
+    public IHttpRequestResult getPolicies(String apiKey, EvolvenHttpRequestFilter evolvenHttpRequestFilter) {
         URL url =  null;
         try {
             URIBuilder builder = new URIBuilder(baseUrl);
@@ -48,7 +48,7 @@ public class EvolvenHttpClient {
             builder.setParameter("json", "true");
             url = builder.build().toURL();
         } catch (URISyntaxException | MalformedURLException e) {
-            return new HttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
+            return new EvolvenHttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
         }
         Map<String, String> body = Stream.of(new String[][] {
                 {"EvolvenSessionKey", apiKey},
@@ -56,10 +56,10 @@ public class EvolvenHttpClient {
         if (!evolvenHttpRequestFilter.isEmpty()) {
            body.put(evolvenHttpRequestFilter.getFilterName(), evolvenHttpRequestFilter.getFilterValue());
         }
-        return HttpClient.post(url, body);
+        return post(url, body);
     }
 
-    public HttpRequestResult updatePolicy(String apiKey, Map<String, String> body) {
+    public IHttpRequestResult updatePolicy(String apiKey, Map<String, String> body) {
         URL url =  null;
         try {
             URIBuilder builder = new URIBuilder(baseUrl);
@@ -68,19 +68,19 @@ public class EvolvenHttpClient {
             builder.setParameter("json", "true");
             url = builder.build().toURL();
         } catch (URISyntaxException | MalformedURLException e) {
-            return new HttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
+            return new EvolvenHttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
         }
 
         body.put("EvolvenSessionKey", apiKey);
         body.put("updateExisting", "true");
-        return HttpClient.post(url, body);
+        return post(url, body);
     }
 
-    public HttpRequestResult testPolicy(String apiKey, Map<String, String> body) {
+    public IHttpRequestResult testPolicy(String apiKey, Map<String, String> body) {
         return testPolicy(apiKey, body, null);
     }
 
-    public HttpRequestResult testPolicy(String apiKey, Map<String, String> body, String envId) {
+    public IHttpRequestResult testPolicy(String apiKey, Map<String, String> body, String envId) {
         URL url =  null;
         try {
             URIBuilder builder = new URIBuilder(baseUrl);
@@ -89,7 +89,7 @@ public class EvolvenHttpClient {
             builder.setParameter("json", "true");
             url = builder.build().toURL();
         } catch (URISyntaxException | MalformedURLException e) {
-            return new HttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
+            return new EvolvenHttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
         }
         body.put("EvolvenSessionKey", apiKey);
         body.put("policy", "true");
@@ -97,10 +97,10 @@ public class EvolvenHttpClient {
         body.put("skipMissing", "false");
         if (StringUtils.isNullOrBlank(envId)) envId = "de";
         body.put("envId", envId);
-        return HttpClient.post(url, body);
+        return post(url, body);
     }
 
-    public HttpRequestResult search(String apiKey, String query) {
+    public IHttpRequestResult search(String apiKey, String query) {
         URL url =  null;
         try {
             URIBuilder builder = new URIBuilder(baseUrl);
@@ -109,7 +109,7 @@ public class EvolvenHttpClient {
             builder.setParameter("json", "true");
             url = builder.build().toURL();
         } catch (URISyntaxException | MalformedURLException e) {
-            return new HttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
+            return new EvolvenHttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
         }
 
         Map<String, String> body = Stream.of(new String[][] {
@@ -117,12 +117,15 @@ public class EvolvenHttpClient {
                 {"crit", query},
                 {"envId", "de"},
         }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
-        return HttpClient.post(url, body);
+        return post(url, body);
     }
 
 
+    static private IHttpRequestResult post(URL url, Map<String, String> body) {
+        return new EvolvenHttpRequestResult(HttpClient.post(url, body));
+    }
 
-    public HttpRequestResult pushPolicy(String apiKey, Map<String, String> body) {
+    public IHttpRequestResult pushPolicy(String apiKey, Map<String, String> body) {
         URL url =  null;
         try {
             URIBuilder builder = new URIBuilder(baseUrl);
@@ -131,13 +134,13 @@ public class EvolvenHttpClient {
             builder.setParameter("json", "true");
             url = builder.build().toURL();
         } catch (URISyntaxException | MalformedURLException e) {
-            return new HttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
+            return new EvolvenHttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
         }
 
         body.put("EvolvenSessionKey", apiKey);
         body.put("updateExisting", "true");
         body.put("envId", "de");
-        return HttpClient.post(url, body);
+        return post(url, body);
     }
 
 }

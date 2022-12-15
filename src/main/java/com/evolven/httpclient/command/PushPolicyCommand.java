@@ -9,7 +9,7 @@ import com.evolven.filesystem.EvolvenCliConfig;
 import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.CachedURLBuilder;
 import com.evolven.httpclient.EvolvenHttpClient;
-import com.evolven.httpclient.http.HttpRequestResult;
+import com.evolven.httpclient.http.IHttpRequestResult;
 import com.evolven.policy.PolicyConfig;
 import com.evolven.policy.PolicyConfigFactory;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -65,7 +65,7 @@ public class PushPolicyCommand extends Command {
         if (StringUtils.isNullOrBlank(apiKey)) {
             throw new CommandException("Api key not found. Login is required.");
         }
-        HttpRequestResult result = evolvenHttpClient.pushPolicy(apiKey, policies);
+        IHttpRequestResult result = evolvenHttpClient.pushPolicy(apiKey, policies);
         if (result.isError()) {
             String errorMsg = "Failed to get policies with the cached details. Login may be required.";
             String reasonPhrase = result.getReasonPhrase();
