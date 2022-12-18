@@ -74,7 +74,6 @@ public class PushPolicyCommand extends Command {
             }
             throw new CommandException(errorMsg);
         }
-        result.print(System.out);
     }
 
     public Map<String, String> fromYamlFile(String filepath) throws IOException {

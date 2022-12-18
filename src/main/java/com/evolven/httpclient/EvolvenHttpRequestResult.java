@@ -40,7 +40,7 @@ public class EvolvenHttpRequestResult implements IHttpRequestResult {
         if (evolvenErrorParsed) return evolvenError;
         evolvenErrorParsed = true;
 
-        final String genericMessage = "Invalid response";
+        final String genericMessage = "Invalid response.";
         JsonNode responseNode = null;
         try {
             responseNode = new ObjectMapper().readTree(httpRequestResult.getContent());
@@ -57,7 +57,7 @@ public class EvolvenHttpRequestResult implements IHttpRequestResult {
         if (textNode == null) return setEvolvenError(genericMessage);
         String errorMsg = textNode.asText();
         if (errorMsg == null) return setEvolvenError(genericMessage);
-        return setEvolvenError(errorMsg);
+        return setEvolvenError(errorMsg + ".");
     }
 
     public boolean isError() {

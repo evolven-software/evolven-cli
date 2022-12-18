@@ -83,7 +83,6 @@ public class TestPolicyCommand extends Command {
             }
             throw new CommandException(errorMsg);
         }
-        System.out.println(result.getContent());
         SearchEnvironmentResponse response = new SearchEnvironmentResponse(result.getContent());
         Iterator<Environment> envIterator = response.iterator();
 
