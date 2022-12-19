@@ -13,6 +13,17 @@ public class Environment {
     @JsonProperty("Host")
     String host;
 
+    @JsonProperty("Compliance")
+    boolean compliance;
+
+    public boolean isCompliance() {
+        return compliance;
+    }
+
+    public void setCompliance(boolean compliance) {
+        this.compliance = compliance;
+    }
+
     public String getEnvId() {
         return envId;
     }

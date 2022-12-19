@@ -10,10 +10,8 @@ import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.CachedURLBuilder;
 import com.evolven.httpclient.EvolvenHttpClient;
 import com.evolven.httpclient.http.IHttpRequestResult;
-import com.evolven.httpclient.model.BenchmarkResult;
-import com.evolven.httpclient.response.SearchEnvironmentResponse;
+import com.evolven.httpclient.response.EnvironmentsResponse;
 import com.evolven.httpclient.model.Environment;
-import com.evolven.httpclient.response.TestEnvironmentResponse;
 import com.evolven.policy.PolicyConfig;
 import com.evolven.policy.PolicyConfigFactory;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -83,11 +81,11 @@ public class TestPolicyCommand extends Command {
             }
             throw new CommandException(errorMsg);
         }
-        SearchEnvironmentResponse response = new SearchEnvironmentResponse(result.getContent());
+        EnvironmentsResponse response = new EnvironmentsResponse(result.getContent());
         Iterator<Environment> envIterator = response.iterator();
 
         String format = "%-30s| %-30s| %s";
-        System.out.println(String.format(format, "Name:", "EnvID:", "Result:"));
+        boolean headerLine = false;
 
         while (envIterator.hasNext()) {
             Environment env = envIterator.next();
@@ -100,12 +98,16 @@ public class TestPolicyCommand extends Command {
                 }
                 throw new CommandException(errorMsg);
             }
-            Iterator<BenchmarkResult> benchmarkResultIterator = new TestEnvironmentResponse(result.getContent()).iterator();
+            Iterator<Environment> benchmarkResultIterator = new EnvironmentsResponse(result.getContent()).iterator();
             if (benchmarkResultIterator.hasNext()) {
+                if (!headerLine) {
+                    System.out.println(String.format(format, "Name:", "EnvID:", "Result:"));
+                    headerLine = true;
+                }
                 System.out.println(String.format(format,
                         env.getName(),
                         env.getEnvId(),
-                        benchmarkResultIterator.next().getResult() ? "PASSED" : "FAILED"));
+                        benchmarkResultIterator.next().isCompliance() ? "PASSED" : "FAILED"));
             }
         }
 

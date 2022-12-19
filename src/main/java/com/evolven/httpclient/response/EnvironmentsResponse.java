@@ -11,11 +11,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 
-public class SearchEnvironmentResponse {
+public class EnvironmentsResponse {
 
     String json;
 
-    public SearchEnvironmentResponse(String json) {
+    public EnvironmentsResponse(String json) {
         this.json = json;
     }
 

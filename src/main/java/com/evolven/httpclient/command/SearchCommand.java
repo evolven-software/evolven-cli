@@ -8,7 +8,7 @@ import com.evolven.filesystem.EvolvenCliConfig;
 import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.CachedURLBuilder;
 import com.evolven.httpclient.EvolvenHttpClient;
-import com.evolven.httpclient.response.SearchEnvironmentResponse;
+import com.evolven.httpclient.response.EnvironmentsResponse;
 import com.evolven.httpclient.http.IHttpRequestResult;
 import com.evolven.httpclient.model.Environment;
 
@@ -69,7 +69,7 @@ public class SearchCommand extends Command {
             }
             throw new CommandException(errorMsg);
         }
-        SearchEnvironmentResponse response = new SearchEnvironmentResponse(result.getContent());
+        EnvironmentsResponse response = new EnvironmentsResponse(result.getContent());
         return response.iterator();
     }
 
