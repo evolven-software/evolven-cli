@@ -2,14 +2,15 @@
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 ROOT_DIR=$(dirname ${SCRIPT_DIR})
+JAR_FILE_PATTERN='evolven-cli*.jar'
 
-jar_file=$(ls ${ROOT_DIR}/lib/evolven-cli*.jar)
+JAR_FILE=$(ls ${ROOT_DIR}/lib/${JAR_FILE_PATTERN})
 if [[ ! -f ${jar_file} ]]; then
-  jar_file=$(ls ${SCRIPT_DIR}/build/output/lib/evolven-cli*.jar)
+  JAR_FILE=$(ls ${SCRIPT_DIR}/build/output/lib/${JAR_FILE_PATTERN})
 fi
-if [[ ! -f ${jar_file} ]]; then
+if [[ ! -f ${JAR_FILE} ]]; then
   echo Could not find Evolven CLI launcher.
   exit 1
 fi
 
-java -jar ${jar_file} "$@"
+java -jar ${JAR_FILE} "$@"
