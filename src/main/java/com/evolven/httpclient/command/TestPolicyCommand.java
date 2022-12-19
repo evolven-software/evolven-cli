@@ -110,7 +110,6 @@ public class TestPolicyCommand extends Command {
                         benchmarkResultIterator.next().isCompliance() ? "PASSED" : "FAILED"));
             }
         }
-
     }
 
     public Map<String, String> fromYamlFile(String filepath) throws IOException {

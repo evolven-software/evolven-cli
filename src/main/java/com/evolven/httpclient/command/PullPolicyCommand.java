@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.util.Iterator;
+import java.util.Random;
+import java.util.stream.IntStream;
 
 public class PullPolicyCommand extends Command {
     FileSystemManager fileSystemManager;
@@ -119,8 +121,17 @@ public class PullPolicyCommand extends Command {
         PolicyWriter policyWriter = new PolicyWriter(policyConfigFactory.createConfig());
         while (iterator.hasNext()) {
             Policy policy = iterator.next();
-            String fileName = StringUtils.replaceNonPathCompatibleChars(policy.getName()) + ".yaml";
-            policyWriter.write(new File(outputDirectory, fileName), policy);
+            String policyName =StringUtils.replaceNonPathCompatibleChars(policy.getName());
+            String fileName = policyName + ".yaml";
+            File policyFile = new File(outputDirectory, fileName);
+            if (policyFile.exists()) {
+                for (int ix = 0; ix < 256; ix++) {
+                    fileName = policyName + "__" + ix + ".yaml";
+                    policyFile = new File(outputDirectory, fileName);
+                    if (!policyFile.exists()) break;
+                }
+            }
+            policyWriter.write(policyFile, policy);
         }
     }
 
