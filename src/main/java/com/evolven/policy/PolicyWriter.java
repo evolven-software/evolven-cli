@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import javafx.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,9 +34,8 @@ public class PolicyWriter {
             ObjectNode node = YAMLUtils.createObjectNode();
             config.getGroupedEditablePolicyFields()
                     .stream()
-                    .map(f -> new Pair<>(f, policyNode.get(f)))
-                    .filter(p -> p.getValue() != null)
-                    .forEach(p -> node.put(p.getKey(), p.getValue().asText()));
+                    .filter(f -> policyNode.get(f) != null)
+                    .forEach(f -> node.put(f, policyNode.get(f).asText()));
             mapper.writeValue(file, node);
             if (config.hasGroupings()) {
                 // the editable fields were added in the grouped order 
