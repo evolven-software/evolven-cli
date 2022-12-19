@@ -53,6 +53,7 @@ build.dependsOn(copyAllDependencies)
 task copyLaunchers(type: Copy) {
     from "${rootDir}/evolven.bat"
     from "${rootDir}/evolven.ps1"
+    from "${rootDir}/evolven.sh"
     into "${buildDir}/output/bin/"
 }
 build.dependsOn(copyLaunchers)

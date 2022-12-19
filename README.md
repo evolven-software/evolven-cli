@@ -25,7 +25,7 @@ cd ./build/output
 evolven.bat login -H host13.evolven.com -p PASS -u evolven -e test
 # download a policy from the Evolven server
 evolven.bat policy pull -n "@Access"
-# edit a policy in a text editor
+# edit the policy in a text editor
 # ...
 # test the policy on a hosts that answers a search query
 evolven.bat policy test -f .\evolven-policies\_Access.yaml -c "host:sergey"
