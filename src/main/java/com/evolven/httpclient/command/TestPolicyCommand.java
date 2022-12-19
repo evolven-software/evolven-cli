@@ -61,6 +61,31 @@ public class TestPolicyCommand extends Command {
         testPolicy(evolvenHttpClient, config,  policies, options.get(OPTION_QUERY));
     }
 
+    private boolean testPolicy(EvolvenHttpClient evolvenHttpClient, String apiKey, Map<String, String> policies, String envId, boolean printHeader) throws CommandException {
+        String format = "%-30s| %-30s| %s";
+            IHttpRequestResult result = evolvenHttpClient.testPolicy(apiKey, policies, envId);
+            if (result.isError()) {
+                String errorMsg = "Failed to run benchmark for the environment with the id: \"" + envId + "\"." ;
+                String reasonPhrase = result.getReasonPhrase();
+                if (!StringUtils.isNullOrBlank(reasonPhrase)) {
+                    errorMsg += " " + reasonPhrase;
+                }
+                throw new CommandException(errorMsg);
+            }
+            Iterator<Environment> benchmarkResultIterator = new EnvironmentsResponse(result.getContent()).iterator();
+            if (benchmarkResultIterator.hasNext()) {
+                if (printHeader) {
+                    System.out.println(String.format(format, "Name:", "EnvID:", "Result:"));
+                    printHeader = false;
+                }
+                Environment env = benchmarkResultIterator.next();
+                System.out.println(String.format(format,
+                        env.getName(),
+                        env.getEnvId(),
+                        env.isCompliance() ? "PASSED" : "FAILED"));
+            }
+            return printHeader;
+    }
     private void testPolicy(EvolvenHttpClient evolvenHttpClient, EvolvenCliConfig config, Map<String, String> policies, String query) throws CommandException {
         String apiKey = null;
         try {
@@ -84,8 +109,8 @@ public class TestPolicyCommand extends Command {
         EnvironmentsResponse response = new EnvironmentsResponse(result.getContent());
         Iterator<Environment> envIterator = response.iterator();
 
-        String format = "%-30s| %-30s| %s";
         boolean headerLine = false;
+        String format = "%-30s| %-30s| %s";
 
         while (envIterator.hasNext()) {
             Environment env = envIterator.next();
