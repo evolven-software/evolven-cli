@@ -11,6 +11,7 @@ import com.evolven.httpclient.EvolvenHttpClient;
 import com.evolven.httpclient.EvolvenHttpRequestFilter;
 import com.evolven.httpclient.http.IHttpRequestResult;
 import com.evolven.httpclient.response.PullPolicyResponse;
+import com.evolven.logging.Logger;
 import com.evolven.policy.Policy;
 import com.evolven.policy.PolicyConfigFactory;
 import com.evolven.policy.PolicyWriter;
@@ -21,9 +22,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Random;
-import java.util.stream.IntStream;
+import java.util.Map;
 
 public class PullPolicyCommand extends Command {
     FileSystemManager fileSystemManager;
@@ -32,6 +33,10 @@ public class PullPolicyCommand extends Command {
     public static final String OPTION_FORMAT = "format";
     public static final String OPTION_POLICY_NAME = "name";
     public static final String FLAG_FORCE = "force";
+    public static final String FLAG_COMMENT = "comment";
+    public static final String FLAG_ALL = "all";
+
+    Logger logger = new Logger(this);
 
     public PullPolicyCommand(FileSystemManager fileSystemManager) {
         registerOptions(new String[] {
@@ -40,7 +45,12 @@ public class PullPolicyCommand extends Command {
                 OPTION_FORMAT,
                 OPTION_POLICY_NAME,
         });
-        registerFlag(FLAG_FORCE);
+        registerFlags(new String[] {
+                FLAG_FORCE,
+                FLAG_COMMENT,
+                FLAG_ALL
+        });
+
         this.fileSystemManager = fileSystemManager;
     }
 
@@ -49,8 +59,9 @@ public class PullPolicyCommand extends Command {
         try {
             return builder.build();
         } catch (MalformedURLException e) {
-            throw new CommandException("Failed to construct base URL. " + e.getMessage());
+            throwCommandException("Failed to construct base URL. " + e.getMessage());
         }
+        return null;
     }
 
     @Override
@@ -59,13 +70,13 @@ public class PullPolicyCommand extends Command {
         try {
             config.setEnvironment();
         } catch (ConfigException e) {
-            throw new CommandException("Failed to load active environment. " + e.getMessage());
+            throwCommandException("Failed to load active environment. " + e.getMessage());
         }
         String baseUrl = null;
         try {
             baseUrl = createBaseUrl(config);
         } catch (ConfigException e) {
-            throw new CommandException("Failed to construct server base url. " + e.getMessage());
+            throwCommandException("Failed to construct server base url. " + e.getMessage());
         }
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
         getPolicies(evolvenHttpClient, config);
@@ -76,10 +87,10 @@ public class PullPolicyCommand extends Command {
         try {
             apiKey = config.getApiKey();
         } catch (ConfigException e) {
-            throw new CommandException("Could not get api key. " + e.getMessage());
+            throwCommandException("Could not get api key. " + e.getMessage());
         }
         if (StringUtils.isNullOrBlank(apiKey)) {
-            throw new CommandException("Api key not found. Login is required.");
+            throwCommandException("Api key not found. Login is required.");
         }
         EvolvenHttpRequestFilter evolvenHttpRequestFilter = new EvolvenHttpRequestFilter();
         if (!StringUtils.isNullOrBlank(options.get(OPTION_POLICY_NAME))) {
@@ -92,14 +103,14 @@ public class PullPolicyCommand extends Command {
             if (!StringUtils.isNullOrBlank(reasonPhrase)) {
                 errorMsg += " " + reasonPhrase;
             }
-            throw new CommandException(errorMsg);
+            throwCommandException(errorMsg);
         }
         try {
             writePolicy(result.getContent());
         } catch (JsonProcessingException e) {
-            System.out.println(e.getMessage());
+            throwCommandException("Failed to parse policy. " + e.getMessage());
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            throwCommandException("Failed to save policy to the local storage. " + e.getMessage());
         }
     }
 
@@ -107,11 +118,13 @@ public class PullPolicyCommand extends Command {
         File outputDirectory = new File(options.get(OPTION_OUTPUT));
         if (outputDirectory.exists()) {
             if (!outputDirectory.isDirectory()) {
-                throw new CommandException("Invalid output location (the location exits and it is not a directory): "
+                throwCommandException("Invalid output location (the location exits and it is not a directory): "
                        + outputDirectory.toPath());
             }
             if (flags.get(FLAG_FORCE)) {
                 FileUtils.deleteDirectory(outputDirectory);
+            } else {
+                throwCommandException("The output location (" + outputDirectory + ") exists already.");
             }
         }
         Files.createDirectories(outputDirectory.toPath());
@@ -119,20 +132,33 @@ public class PullPolicyCommand extends Command {
         Iterator<Policy> iterator = pullPolicyResponse.iterator();
         PolicyConfigFactory policyConfigFactory = new PolicyConfigFactory(fileSystemManager.getPolicyConfigFile());
         PolicyWriter policyWriter = new PolicyWriter(policyConfigFactory.createConfig());
+        IndexedCache indexedCache = new IndexedCache();
         while (iterator.hasNext()) {
             Policy policy = iterator.next();
-            String policyName =StringUtils.replaceNonPathCompatibleChars(policy.getName());
-            String fileName = policyName + ".yaml";
+            String fileName = indexedCache.get(StringUtils.replaceNonPathCompatibleChars(policy.getName())) + ".yaml";
             File policyFile = new File(outputDirectory, fileName);
-            if (policyFile.exists()) {
-                for (int ix = 0; ix < 256; ix++) {
-                    fileName = policyName + "__" + ix + ".yaml";
-                    policyFile = new File(outputDirectory, fileName);
-                    if (!policyFile.exists()) break;
-                }
-            }
             policyWriter.write(policyFile, policy);
         }
+    }
+
+    class IndexedCache {
+        private Map<String, Integer> cache = new HashMap<>();
+
+        public String get(String s) {
+            Integer ix = cache.get(s);
+            if (ix == null) {
+                cache.put(s, 0);
+            } else {
+                cache.put(s, ix + 1);
+                s += "__" + ix;
+            }
+            return s;
+        }
+    }
+
+    private void throwCommandException(String err) throws CommandException {
+        logger.error(err);
+        throw new CommandException(err);
     }
 
     @Override
