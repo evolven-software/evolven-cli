@@ -9,7 +9,7 @@
 ```bash
 cp -r ./build/output ~/evolven-cli
 ```
-2.1 Invoke the program by: 
+2.1. Invoke the program by: 
 ```bash
 ~/evolven-cli/bin/evolven.bat --help
 ```
@@ -52,12 +52,12 @@ evolven.bat logout
 
 ### Config commands group
 
-##### Set the active environment (the environment the following commands with work with)
+##### Set the active environment (the environment the following commands will work with)
 ```bash
 evolven.bat config set -a test
 ```
 
-##### Get the current active environment (the environment the following commands with work with)
+##### Get the current active environment (the environment the following commands will work with)
 ```bash
 evolven.bat config get -a
 ```
@@ -91,6 +91,3 @@ evolven.bat policy test -f .\evolven-policies\_Access.yaml -c "host:sergey"
 ```bash
 evolven.bat policy push -f .\evolven-policies\Taras-test-AAAS__Connectivity_Check___Windows__WinRM-Enabled.yaml
 ```
-
-
-

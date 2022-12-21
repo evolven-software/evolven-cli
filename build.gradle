@@ -46,7 +46,7 @@ jar {
 task copyAllDependencies(type: Copy) {
     from configurations.runtimeClasspath
     from jar
-    into "${buildDir}/output/lib"
+    into "${buildDir}/output/lib/"
 }
 build.dependsOn(copyAllDependencies)
 
@@ -57,6 +57,12 @@ task copyLaunchers(type: Copy) {
     into "${buildDir}/output/bin/"
 }
 build.dependsOn(copyLaunchers)
+
+task copyInstallers(type: Copy) {
+    from "${rootDir}/InstallWindows.ps1"
+    into "${buildDir}/output/"
+}
+build.dependsOn(copyInstallers)
 
 test {
     useJUnitPlatform()

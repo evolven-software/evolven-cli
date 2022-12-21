@@ -9,5 +9,5 @@ if ( [string]::IsNullOrWhiteSpace($launcherPath)  ) {
     Write-Error "Cannot resolve launcher location."
     exit 1
 }
-$ArgumentList = (@("-jar", "$launcherPath") + $args)
+$ArgumentList = (@("-jar", "`"$launcherPath`"") + $args)
 Start-Process -NoNewWindow -Wait -FilePath "java.exe" -ArgumentList $ArgumentList
