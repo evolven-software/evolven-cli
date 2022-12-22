@@ -18,8 +18,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -62,7 +65,6 @@ public class TestPolicyCommand extends Command {
     }
 
     private boolean testPolicy(EvolvenHttpClient evolvenHttpClient, String apiKey, Map<String, String> policies, String envId, boolean printHeader) throws CommandException {
-        String format = "%-30s| %-30s| %s";
             IHttpRequestResult result = evolvenHttpClient.testPolicy(apiKey, policies, envId);
             if (result.isError()) {
                 String errorMsg = "Failed to run benchmark for the environment with the id: \"" + envId + "\"." ;
@@ -73,18 +75,60 @@ public class TestPolicyCommand extends Command {
                 throw new CommandException(errorMsg);
             }
             Iterator<Environment> benchmarkResultIterator = new EnvironmentsResponse(result.getContent()).iterator();
+            PolicyTestResultAccumulator policyTestResultAccumulator = new PolicyTestResultAccumulator();
             if (benchmarkResultIterator.hasNext()) {
-                if (printHeader) {
-                    System.out.println(String.format(format, "Name:", "EnvID:", "Result:"));
-                    printHeader = false;
-                }
-                Environment env = benchmarkResultIterator.next();
-                System.out.println(String.format(format,
-                        env.getName(),
-                        env.getEnvId(),
-                        env.isCompliance() ? "PASSED" : "FAILED"));
+                policyTestResultAccumulator.add(benchmarkResultIterator.next());
             }
             return printHeader;
+    }
+
+
+    class PolicyTestResultAccumulator {
+
+        class PolicyTestResult {
+            String envName;
+            String envId;
+            boolean testResult;
+            public PolicyTestResult(String envName, String envId, boolean testResult) {
+                this.envName = envName;
+                this.envId = envId;
+                this.testResult = testResult;
+            }
+
+            public String toLine(String format) {
+                String line = String.format(format,
+                        envName,
+                        envId,
+                        testResult ? "PASSED" : "FAILED");
+                return envName + line.substring(envName.length()).replace(' ', '.');
+            }
+        }
+
+        String format = "%-60s|%-10s|%s";
+        String header = String.format(format, "Name:", "EnvID:", "Result:");
+        String separator = StringUtils.repeat("-", header.length() + 5);
+        int numFailed = 0;
+        List<PolicyTestResult> result = new ArrayList<>();
+
+        public void add(Environment env) {
+            numFailed += env.isCompliance() ? 0 : 1;
+            result.add(new PolicyTestResult(env.getName(), env.getEnvId(), env.isCompliance()));
+        }
+
+        void print(PrintStream out) {
+            if (result.size() == 0) return;
+            out.println(separator);
+            out.println(header);
+            out.println(separator);
+            result.stream().forEach(r -> out.println(r.toLine(format)));
+            out.println(separator);
+            out.println(String.format("Total: %d; %d passed; %d failed", result.size(), result.size() - numFailed, numFailed));
+            if (numFailed == 0) out.println("SUCCESS");
+            else out.println("FAILED");
+
+        }
+
+
     }
     private void testPolicy(EvolvenHttpClient evolvenHttpClient, EvolvenCliConfig config, Map<String, String> policies, String query) throws CommandException {
         String apiKey = null;
@@ -108,10 +152,7 @@ public class TestPolicyCommand extends Command {
         }
         EnvironmentsResponse response = new EnvironmentsResponse(result.getContent());
         Iterator<Environment> envIterator = response.iterator();
-
-        boolean headerLine = false;
-        String format = "%-30s| %-30s| %s";
-
+        PolicyTestResultAccumulator policyTestResultAccumulator = new PolicyTestResultAccumulator();
         while (envIterator.hasNext()) {
             Environment env = envIterator.next();
             result = evolvenHttpClient.testPolicy(apiKey, policies, env.getEnvId());
@@ -125,16 +166,10 @@ public class TestPolicyCommand extends Command {
             }
             Iterator<Environment> benchmarkResultIterator = new EnvironmentsResponse(result.getContent()).iterator();
             if (benchmarkResultIterator.hasNext()) {
-                if (!headerLine) {
-                    System.out.println(String.format(format, "Name:", "EnvID:", "Result:"));
-                    headerLine = true;
-                }
-                System.out.println(String.format(format,
-                        env.getName(),
-                        env.getEnvId(),
-                        benchmarkResultIterator.next().isCompliance() ? "PASSED" : "FAILED"));
+                policyTestResultAccumulator.add(benchmarkResultIterator.next());
             }
         }
+        policyTestResultAccumulator.print(System.out);
     }
 
     public Map<String, String> fromYamlFile(String filepath) throws IOException {

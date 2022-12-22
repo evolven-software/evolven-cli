@@ -1,23 +1,50 @@
 # evolven-cli
 
+## Build from the source
+```bash
+# In the root directory run the command
+gradle build
+```
+
+
 ## Installation
-1. In the root project directory run: 
-```bash
-.\gradlew.bat build
+#### Windows
+There are two ways to install evolven-cli on a Windows machine: 
+1. manually 
+2. InstallWindows.ps1
+##### Manual installation
+1. Copy the evolven-cli directory to a desired location (ex.: C:\Program Files\evolven-cli).
+2. Append the bin directory to the path (ex.: append to the Path environment variable the value C:\Program Files\evolven-cli\bin).
+##### Installation with the script:
+1. Open PowerShell and cd to evolven-cli directory.
+2. Execute the InstallWindows.ps1. The script will update the Path environment variable.
+```PowerShell
+./InstallWindows.ps1
 ```
-2. (Optional) copy the ./build/output directory to a desired location
-```bash
-cp -r ./build/output ~/evolven-cli
+3. Use the -AllUsers flag to install for all the users.
+```PowerShell
+./InstallWindows.ps1 -AllUsers
 ```
-2.1. Invoke the program by: 
+
+#### Unix like systems
+1. Copy evolven-cli directory to a desired location.
+2. Update the .bashrc (or similar configuration file for your shell) with the new PATH variable that contains evolven-cli/bin directory. Example:
 ```bash
-~/evolven-cli/bin/evolven.bat --help
+cp -r evolven-cli ~/
+echo "export PATH=${PATH}:~/evolven-cli/bin" >> ~/.bashrc
 ```
-3. Invoke the program form the building location:
+3. Restart the shell.
+
+## Invoke evolven-cli
+1. On Windows machines 
+```PowerShell
+evolven.bat --help
+```
+2. On Unix-like machines
 ```bash
-cd ./build/output
-./evolven.bat --help
+evolven.sh --help
 ```
+
 
 ## Typical workflow
 ```bash
