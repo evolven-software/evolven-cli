@@ -2,6 +2,7 @@ package com.evolven.httpclient.command;
 
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
+import com.evolven.command.CommandExceptionLogin;
 import com.evolven.common.StringUtils;
 import com.evolven.common.YAMLUtils;
 import com.evolven.config.ConfigException;
@@ -10,6 +11,7 @@ import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.CachedURLBuilder;
 import com.evolven.httpclient.EvolvenHttpClient;
 import com.evolven.httpclient.http.IHttpRequestResult;
+import com.evolven.logging.Logger;
 import com.evolven.policy.PolicyConfig;
 import com.evolven.policy.PolicyConfigFactory;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,6 +26,8 @@ public class PushPolicyCommand extends Command {
 
     public static final String OPTION_POLICY_FILENAME = "filename";
     FileSystemManager fileSystemManager;
+
+    Logger logger = new Logger(this);
 
     public PushPolicyCommand(FileSystemManager fileSystemManager) {
         this.fileSystemManager = fileSystemManager;
@@ -60,10 +64,12 @@ public class PushPolicyCommand extends Command {
         try {
             apiKey = config.getApiKey();
         } catch (ConfigException e) {
-            throw new CommandException("Could not get api key. " + e.getMessage());
+            logger.error("Could not get api key. " + e.getMessage());
+            throw new CommandExceptionLogin();
         }
         if (StringUtils.isNullOrBlank(apiKey)) {
-            throw new CommandException("Api key not found. Login is required.");
+            logger.error("Api key not found. Login is required.");
+            throw new CommandExceptionLogin();
         }
         IHttpRequestResult result = evolvenHttpClient.pushPolicy(apiKey, policies);
         if (result.isError()) {
@@ -72,7 +78,8 @@ public class PushPolicyCommand extends Command {
             if (!StringUtils.isNullOrBlank(reasonPhrase)) {
                 errorMsg += " " + reasonPhrase;
             }
-            throw new CommandException(errorMsg);
+            logger.error(errorMsg);
+            throw new CommandExceptionLogin();
         }
     }
 

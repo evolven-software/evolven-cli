@@ -2,13 +2,19 @@ package com.evolven.cli;
 
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
-import com.evolven.command.InternalInvalidParameterException;
-import com.evolven.command.InvalidParameterException;
 import picocli.CommandLine;
 import picocli.CommandLine.Spec;
 import picocli.CommandLine.Model.CommandSpec;
-@CommandLine.Command(name = "login", header = "Login and create session key")
-public class EvolvenCommandLogin extends EvolvenCommand implements Runnable {
+
+@CommandLine.Command(
+        name = EvolvenCommandLogin.COMMAND_NAME,
+        header = "Login and create session key",
+        footer = "%nExample:%n" + EvolvenCommandLogin.COMMAND_EXAMPLE
+)
+public class EvolvenCommandLogin extends EvolvenCommand {
+
+    public static final String COMMAND_NAME = "login";
+    public static final String COMMAND_EXAMPLE = "evolven " + COMMAND_NAME + " -H <host> -p <password> -u <username> -e <label>";
 
     @CommandLine.Option(names = {"-U", "--url"}, description = "The full url of the server.")
     String url;
@@ -45,23 +51,19 @@ public class EvolvenCommandLogin extends EvolvenCommand implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void execute() throws CommandException {
         if (help) {
             spec.commandLine().usage(System.out);
             return;
         }
-        try {
-            addOption(url, this);
-            addOption(port, this);
-            addOption(username, this);
-            addOption(password, this);
-            addOption(host, this);
-            addOption(schema, this);
-            addOption(env, this);
-            addFlag(skipCache, this);
-            execute();
-        } catch (CommandException e) {
-            throw new EvolvenCommandException(e);
-        }
+        addOption(url, this);
+        addOption(port, this);
+        addOption(username, this);
+        addOption(password, this);
+        addOption(host, this);
+        addOption(schema, this);
+        addOption(env, this);
+        addFlag(skipCache, this);
+        invokeHandler();
     }
 }

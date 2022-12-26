@@ -5,14 +5,12 @@ import com.evolven.logging.Logger;
 import picocli.CommandLine;
 
 import com.evolven.command.CommandException;
-import com.evolven.command.InvalidParameterException;
-import com.evolven.command.InternalInvalidParameterException;
 
 @CommandLine.Command(
         name = "create",
         header = "Creates configuration files in the current working directory " +
         "(use it if other methods filed and the the program assumed to be executed from the current location always")
-public class EvolvenCommandConfigCreate extends EvolvenCommand implements Runnable {
+public class EvolvenCommandConfigCreate extends EvolvenCommand {
 
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
@@ -30,16 +28,12 @@ public class EvolvenCommandConfigCreate extends EvolvenCommand implements Runnab
     }
 
     @Override
-    public void run() {
+    public void execute() throws CommandException {
         if (help) {
             spec.commandLine().usage(System.out);
             return;
         }
-        try {
-            addFlag(force, this);
-            execute();
-        } catch(CommandException e) {
-            throw new EvolvenCommandException(e);
-        }
+        addFlag(force, this);
+        invokeHandler();
     }
 }

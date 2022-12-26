@@ -2,6 +2,7 @@ package com.evolven.httpclient.command;
 
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
+import com.evolven.command.CommandExceptionLogin;
 import com.evolven.common.StringUtils;
 import com.evolven.config.ConfigException;
 import com.evolven.filesystem.EvolvenCliConfig;
@@ -87,10 +88,12 @@ public class PullPolicyCommand extends Command {
         try {
             apiKey = config.getApiKey();
         } catch (ConfigException e) {
-            throwCommandException("Could not get api key. " + e.getMessage());
+            logger.error("Could not get api key. " + e.getMessage());
+            throw new CommandExceptionLogin();
         }
         if (StringUtils.isNullOrBlank(apiKey)) {
-            throwCommandException("Api key not found. Login is required.");
+            logger.error("Api key not found. Login is required.");
+            throw new CommandExceptionLogin();
         }
         EvolvenHttpRequestFilter evolvenHttpRequestFilter = new EvolvenHttpRequestFilter();
         if (!StringUtils.isNullOrBlank(options.get(OPTION_POLICY_NAME))) {
@@ -103,7 +106,9 @@ public class PullPolicyCommand extends Command {
             if (!StringUtils.isNullOrBlank(reasonPhrase)) {
                 errorMsg += " " + reasonPhrase;
             }
-            throwCommandException(errorMsg);
+            logger.error(errorMsg);
+            throw new CommandExceptionLogin();
+
         }
         try {
             writePolicy(result.getContent());

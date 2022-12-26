@@ -1,14 +1,15 @@
 package com.evolven.cli;
 
-import com.evolven.command.Command;
-import com.evolven.command.CommandException;
-import com.evolven.command.InvalidParameterException;
+import com.evolven.cli.exception.EvolvenCommandException;
+import com.evolven.cli.exception.EvolvenCommandExceptionLogin;
+import com.evolven.command.*;
 import com.evolven.common.Enum;
+import javafx.fxml.LoadException;
 
 import java.io.File;
 import java.io.IOException;
 
-public class EvolvenCommand {
+public abstract class EvolvenCommand implements Runnable {
     private Command command;
 
     public EvolvenCommand() {}
@@ -20,7 +21,9 @@ public class EvolvenCommand {
         return this;
     }
 
-    protected void execute() throws CommandException {
+    protected abstract void execute() throws CommandException;
+
+    protected void invokeHandler() throws CommandException {
         command.execute();
     }
 
@@ -84,5 +87,18 @@ public class EvolvenCommand {
         java.lang.reflect.Field field = getField(fieldObject, parent);
         if (field == null) return null;
         return field.getName();
+    }
+
+    @Override
+    public void run() {
+        try {
+            execute();
+        } catch (CommandFailure e) {
+            throw new EvolvenCommandException(e);
+        } catch (CommandExceptionLogin e) {
+            throw new EvolvenCommandExceptionLogin();
+        } catch (CommandException e) {
+            throw new EvolvenCommandException(e);
+        }
     }
 }

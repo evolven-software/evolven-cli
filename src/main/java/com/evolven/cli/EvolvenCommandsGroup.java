@@ -1,9 +1,10 @@
 package com.evolven.cli;
 
+import com.evolven.command.CommandException;
 import picocli.CommandLine;
 import java.io.PrintStream;
 
-public class EvolvenCommandsGroup extends EvolvenCommand implements Runnable {
+public class EvolvenCommandsGroup extends EvolvenCommand {
 
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
@@ -12,7 +13,7 @@ public class EvolvenCommandsGroup extends EvolvenCommand implements Runnable {
     boolean help;
 
     @Override
-    public void run() {
+    public void execute() throws CommandException {
         PrintStream ps = System.err;
         if (help) {
             ps = System.out;

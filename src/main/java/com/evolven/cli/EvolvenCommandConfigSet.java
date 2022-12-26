@@ -1,12 +1,13 @@
 package com.evolven.cli;
 
+import com.evolven.cli.exception.EvolvenCommandException;
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
 import com.evolven.logging.Logger;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = EvolvenCommandConfigSet.COMMAND_NAME)
-public class EvolvenCommandConfigSet extends EvolvenCommand implements Runnable {
+public class EvolvenCommandConfigSet extends EvolvenCommand {
     final static String COMMAND_NAME = "set";
 
     @CommandLine.Option(names = {"-a", "--active-env"}, description = "Set active environment from which to get the value.")
@@ -35,19 +36,15 @@ public class EvolvenCommandConfigSet extends EvolvenCommand implements Runnable 
     }
 
     @Override
-    public void run() {
+    public void execute() throws CommandException {
         if (help) {
             spec.commandLine().usage(System.out);
             return;
         }
-        try {
-            addOption(env, this);
-            addOption(activeEnv, this);
-            addOption(key, this);
-            addOption(value, this);
-            execute();
-        } catch (CommandException e) {
-            throw new EvolvenCommandException(e);
-        }
+        addOption(env, this);
+        addOption(activeEnv, this);
+        addOption(key, this);
+        addOption(value, this);
+        invokeHandler();
     }
 }

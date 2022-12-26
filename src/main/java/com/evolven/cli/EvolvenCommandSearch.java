@@ -2,13 +2,12 @@ package com.evolven.cli;
 
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
-import com.evolven.command.InvalidParameterException;
 import picocli.CommandLine;
 import picocli.CommandLine.Spec;
 import picocli.CommandLine.Model.CommandSpec;
 
 @CommandLine.Command(name = "search", header = "Search Evolven entity.")
-public class EvolvenCommandSearch extends EvolvenCommand implements Runnable {
+public class EvolvenCommandSearch extends EvolvenCommand {
 
     @CommandLine.Option(names = {"-q", "--query"}, required = true, description = "Evolven search query.")
     String query;
@@ -25,16 +24,12 @@ public class EvolvenCommandSearch extends EvolvenCommand implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void execute() throws CommandException {
         if (help) {
             spec.commandLine().usage(System.out);
             return;
         }
-        try {
-            addOption(query, this);
-            execute();
-        } catch (CommandException e) {
-            throw new EvolvenCommandException(e);
-        }
+        addOption(query, this);
+        invokeHandler();
     }
 }

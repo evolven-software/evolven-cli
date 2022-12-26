@@ -5,7 +5,7 @@ import com.evolven.command.CommandException;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "test", header = "Upload an Evolven policy")
-public class EvolvenCommandPolicyTest extends EvolvenCommand implements Runnable {
+public class EvolvenCommandPolicyTest extends EvolvenCommand {
 
     @CommandLine.Option(names = {"-f", "--policy-file"}, required = true, description = "Path to a policy file.")
     String filename;
@@ -24,17 +24,13 @@ public class EvolvenCommandPolicyTest extends EvolvenCommand implements Runnable
     }
 
     @Override
-    public void run() {
+    public void execute() throws CommandException {
         if (help) {
             spec.commandLine().usage(System.out);
             return;
         }
-        try {
             addOption(filename, this);
             addOption(query, this);
-            execute();
-        } catch (CommandException e) {
-            throw new EvolvenCommandException(e);
-        }
+            invokeHandler();
     }
 }

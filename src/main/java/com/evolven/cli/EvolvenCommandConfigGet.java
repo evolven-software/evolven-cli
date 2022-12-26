@@ -1,12 +1,13 @@
 package com.evolven.cli;
 
+import com.evolven.cli.exception.EvolvenCommandException;
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
 import com.evolven.logging.Logger;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = EvolvenCommandConfigGet.COMMAND_NAME)
-public class EvolvenCommandConfigGet extends EvolvenCommand implements Runnable {
+public class EvolvenCommandConfigGet extends EvolvenCommand {
     final static String COMMAND_NAME = "get";
 
 
@@ -32,18 +33,14 @@ public class EvolvenCommandConfigGet extends EvolvenCommand implements Runnable 
     }
 
     @Override
-    public void run() {
+    public void execute() throws CommandException {
         if (help) {
             spec.commandLine().usage(System.out);
             return;
         }
-        try {
-            addOption(env, this);
-            addOption(key, this);
-            addFlag(activeEnv, this);
-            execute();
-        } catch (CommandException e) {
-            throw new EvolvenCommandException(e);
-        }
+        addOption(env, this);
+        addOption(key, this);
+        addFlag(activeEnv, this);
+        invokeHandler();
     }
 }
