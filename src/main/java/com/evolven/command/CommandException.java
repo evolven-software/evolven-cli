@@ -22,6 +22,7 @@ public class CommandException extends Exception {
 
     public CommandException(Exception e) {
         super(e);
+        msg = e.getMessage();
         logger.error(e.getMessage());
     }
 

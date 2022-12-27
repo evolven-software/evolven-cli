@@ -66,11 +66,12 @@ public class SearchCommand extends Command {
         }
         IHttpRequestResult result = evolvenHttpClient.search(apiKey, query);
         if (result.isError()) {
-            String errorMsg = "Failed to get policies with the cached details. Login may be required.";
+            String errorMsg = "Failed to execute search with the cached details. Login may be required.";
             String reasonPhrase = result.getReasonPhrase();
             if (!StringUtils.isNullOrBlank(reasonPhrase)) {
                 errorMsg += " " + reasonPhrase;
             }
+            logger.error(errorMsg);
             throw new CommandException(errorMsg);
         }
         EnvironmentsResponse response = new EnvironmentsResponse(result.getContent());

@@ -30,5 +30,6 @@ public class EvolvenCommandException extends RuntimeException {
 
     public EvolvenCommandException(Exception e) {
         super(e);
+        msg = e.getMessage();
     }
 }
