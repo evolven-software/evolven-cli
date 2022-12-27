@@ -109,6 +109,7 @@ public class LoginCommand extends Command {
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
         IHttpRequestResult result = login(evolvenHttpClient, cachedValue, config);
         cacheApiKey(result, config);
+        System.out.printf("Login successful! ");
     }
 
     private void throwCommandException(String err) throws CommandException {

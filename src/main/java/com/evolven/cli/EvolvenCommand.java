@@ -4,7 +4,6 @@ import com.evolven.cli.exception.EvolvenCommandException;
 import com.evolven.cli.exception.EvolvenCommandExceptionLogin;
 import com.evolven.command.*;
 import com.evolven.common.Enum;
-import javafx.fxml.LoadException;
 
 import java.io.File;
 import java.io.IOException;
@@ -94,8 +93,8 @@ public abstract class EvolvenCommand implements Runnable {
         try {
             execute();
         } catch (CommandFailure e) {
-            throw new EvolvenCommandException(e);
-        } catch (CommandExceptionLogin e) {
+            throw new EvolvenCommandException();
+        } catch (CommandExceptionNotLoggedIn e) {
             throw new EvolvenCommandExceptionLogin();
         } catch (CommandException e) {
             throw new EvolvenCommandException(e);

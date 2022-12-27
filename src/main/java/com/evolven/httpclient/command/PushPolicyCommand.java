@@ -2,7 +2,7 @@ package com.evolven.httpclient.command;
 
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
-import com.evolven.command.CommandExceptionLogin;
+import com.evolven.command.CommandExceptionNotLoggedIn;
 import com.evolven.common.StringUtils;
 import com.evolven.common.YAMLUtils;
 import com.evolven.config.ConfigException;
@@ -65,11 +65,11 @@ public class PushPolicyCommand extends Command {
             apiKey = config.getApiKey();
         } catch (ConfigException e) {
             logger.error("Could not get api key. " + e.getMessage());
-            throw new CommandExceptionLogin();
+            throw new CommandExceptionNotLoggedIn();
         }
         if (StringUtils.isNullOrBlank(apiKey)) {
             logger.error("Api key not found. Login is required.");
-            throw new CommandExceptionLogin();
+            throw new CommandExceptionNotLoggedIn();
         }
         IHttpRequestResult result = evolvenHttpClient.pushPolicy(apiKey, policies);
         if (result.isError()) {
@@ -79,7 +79,7 @@ public class PushPolicyCommand extends Command {
                 errorMsg += " " + reasonPhrase;
             }
             logger.error(errorMsg);
-            throw new CommandExceptionLogin();
+            throw new CommandExceptionNotLoggedIn();
         }
     }
 

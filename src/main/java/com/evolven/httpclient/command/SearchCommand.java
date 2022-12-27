@@ -2,7 +2,7 @@ package com.evolven.httpclient.command;
 
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
-import com.evolven.command.CommandExceptionLogin;
+import com.evolven.command.CommandExceptionNotLoggedIn;
 import com.evolven.common.StringUtils;
 import com.evolven.config.ConfigException;
 import com.evolven.filesystem.EvolvenCliConfig;
@@ -58,11 +58,11 @@ public class SearchCommand extends Command {
             apiKey = config.getApiKey();
         } catch (ConfigException e) {
             logger.error("Could not get api key. " + e.getMessage());
-            throw new CommandExceptionLogin();
+            throw new CommandExceptionNotLoggedIn();
         }
         if (StringUtils.isNullOrBlank(apiKey)) {
             logger.error("Api key not found. Login is required.");
-            throw new CommandExceptionLogin();
+            throw new CommandExceptionNotLoggedIn();
         }
         IHttpRequestResult result = evolvenHttpClient.search(apiKey, query);
         if (result.isError()) {
