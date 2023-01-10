@@ -22,12 +22,11 @@ public class EvolvenCommandLogin extends EvolvenCommand {
     @CommandLine.Option(names = {"-u", "--username"}, description = "Username.")
     String username;
 
-    @CommandLine.Option(names = {"-p", "--password"}, required = true, description = "Password.")
-    String password;
-
     @CommandLine.Option(names = {"-H", "--host"}, description = "Host.")
     String host;
 
+    @CommandLine.Option(names = {"-p", "--password"}, required = true, description = "Password.")
+    String password;
     @CommandLine.Option(names = {"-s", "--schema"}, defaultValue = "https", description = "The url schema (ex.: https).")
     String schema;
 
@@ -56,10 +55,10 @@ public class EvolvenCommandLogin extends EvolvenCommand {
             spec.commandLine().usage(System.out);
             return;
         }
+        addOption(password, this);
         addOption(url, this);
         addOption(port, this);
         addOption(username, this);
-        addOption(password, this);
         addOption(host, this);
         addOption(schema, this);
         addOption(env, this);

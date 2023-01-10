@@ -26,9 +26,9 @@ public abstract class EvolvenCommand implements Runnable {
         command.execute();
     }
 
-    void addOption(String option, Object parent) throws InvalidParameterException {
+    void addOption(Object option, Object parent) throws InvalidParameterException {
         if (option == null) return;
-        command.addOption(getFieldName(option, parent), option);
+        command.addOption(getFieldName(option, parent), (String) option);
     }
 
     void addOption(Enum option, Object parent) throws InvalidParameterException {
@@ -76,7 +76,7 @@ public abstract class EvolvenCommand implements Runnable {
             } catch (Exception e) {
                 return null;
             }
-            if (fieldObject.equals(currentFieldObject)) {
+            if (System.identityHashCode(fieldObject) == System.identityHashCode(currentFieldObject)) {
                 return field;
             }
         }

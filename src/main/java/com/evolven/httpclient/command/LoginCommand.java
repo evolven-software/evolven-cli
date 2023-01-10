@@ -53,21 +53,29 @@ public class LoginCommand extends Command {
        cachedValue.set(OPTION_HOST, Errors.rethrow().wrap(config::setHost));
        cachedValue.set(OPTION_URL, Errors.rethrow().wrap(config::setUrl));
        cachedValue.set(OPTION_SCHEMA, Errors.rethrow().wrap(config::setSchema));
+       cachedValue.set(OPTION_PORT, Errors.rethrow().wrap(config::setPort));
     }
 
     private String createBaseUrl(CachedValue cachedValue, EvolvenCliConfig config) throws CommandException {
         CachedURLBuilder builder = new CachedURLBuilder(config);
-        builder.setHost(cachedValue.getOrThrow(
-                OPTION_HOST,
-                Errors.rethrow().wrap(config::getHost),
-                new InvalidParameterException("No host provided.")));
 
-        builder.setPort(cachedValue.get(
-                OPTION_PORT,
-                Errors.rethrow().wrap(config::getPort)));
-        builder.setScheme(cachedValue.get(
-                OPTION_HOST,
-                Errors.rethrow().wrap(config::getHost)));
+        String baseUrl = cachedValue.get(
+                OPTION_URL,
+                Errors.rethrow().wrap(config::getBaseUrl));
+        builder.setBaseUrl(baseUrl);
+        if (baseUrl == null) {
+            builder.setHost(cachedValue.getOrThrow(
+                    OPTION_HOST,
+                    Errors.rethrow().wrap(config::getHost),
+                    new InvalidParameterException("No host or url provided.")));
+            builder.setPort(cachedValue.get(
+                    OPTION_PORT,
+                    Errors.rethrow().wrap(config::getPort)));
+            builder.setScheme(cachedValue.get(
+                    OPTION_SCHEMA,
+                    Errors.rethrow().wrap(config::getSchema)));
+        }
+
         try {
             return builder.build();
         } catch (MalformedURLException | ConfigException e) {

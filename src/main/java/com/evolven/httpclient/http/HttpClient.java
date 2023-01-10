@@ -1,5 +1,6 @@
 package com.evolven.httpclient.http;
 
+import com.evolven.logging.Logger;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -21,68 +22,7 @@ import java.util.stream.Collectors;
 
 public class HttpClient {
 
-    String host;
-
-    String url;
-
-    String path;
-
-    Short port;
-    List<NameValuePair> urlParams = new ArrayList<>();
-
-    void setPort(Short port) {
-        this.port = port;
-    }
-
-    void setPath(String path) {
-        this.path = path;
-    }
-
-    void setUrl(String url) {
-        this.url = url;
-    }
-
-    void setHost(String host) {
-        this.host = host;
-    }
-
-    String getUrlParams() {
-        try {
-            UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(urlParams);
-            return new BufferedReader(new InputStreamReader(urlEncodedFormEntity.getContent()))
-                    .lines().collect(Collectors.joining("&"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    void addUrlParams(Map<String, String> params) {
-        urlParams.addAll(params
-                .keySet()
-                .stream()
-                .map(key -> new BasicNameValuePair(key, params.get(key))).collect(Collectors.toList()));
-    }
-
-    void addHeaderParams(Map<String, String> params) {
-    }
-
-    String getUrl() {
-        if (url != null) {
-            return url;
-        }
-        StringBuilder urlStringBuilder = new StringBuilder(host);
-        if (port != null) {
-            urlStringBuilder.append(":");
-            urlStringBuilder.append(port);
-        }
-        if (urlParams.size() == 0) return host;
-        return host + "?" + getUrlParams();
-    }
-
-    void addUrlParam(String name, String value) {
-        urlParams.add(new BasicNameValuePair(name, value));
-    }
+    private static final Logger logger = new Logger(HttpClient.class);
 
     private static HttpRequestResult executeRequest(CloseableHttpClient httpClient, HttpUriRequest request) {
         try (CloseableHttpResponse response = httpClient.execute(request)) {
@@ -116,6 +56,12 @@ public class HttpClient {
     }
 
     public static HttpRequestResult post(URL url, Map<String, String> form) {
+        logger.debug("method: POST; url: " + url.toString());
+        form
+                .keySet()
+                .stream()
+                .forEach(k -> logger.debug(k + ": " + form.get(k)));
+
         UrlEncodedFormEntity urlEncodedFormEntity = null;
         try {
             urlEncodedFormEntity = new UrlEncodedFormEntity(toNameValuePairList(form));
@@ -126,6 +72,7 @@ public class HttpClient {
     }
 
     public static HttpRequestResult post(URL url, String body) {
+        logger.debug("method: POST; url: " + url.toString() + "; body: " + body);
         StringEntity stringEntity = null;
         try {
             stringEntity = new StringEntity(body);

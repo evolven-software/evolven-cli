@@ -3,17 +3,20 @@ package com.evolven.httpclient;
 import com.evolven.common.StringUtils;
 import com.evolven.httpclient.http.HttpClient;
 import com.evolven.httpclient.http.IHttpRequestResult;
+import com.evolven.logging.Logger;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class EvolvenHttpClient {
     private String baseUrl;
+    private Logger logger = new Logger(this);
 
     public EvolvenHttpClient(String baseUrl) {
         this.baseUrl = baseUrl;
@@ -27,15 +30,16 @@ public class EvolvenHttpClient {
             builder.setParameter("action", "login");
             url = builder.build().toURL();
         } catch (URISyntaxException | MalformedURLException e) {
-            return new EvolvenHttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
+            return new EvolvenHttpRequestResult("Failed to construct url. " + e.getMessage());
         }
-        Map<String, String> body = Stream.of(new String[][] {
-                {"json", "true"},
-                {"user", user},
-                {"pass", password},
-                {"isEncrypted", "false"},
-                {"ForceIP", "true"},
-        }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        Map<String, String> body = new HashMap<String, String>() {{
+                put("json", "true");
+                put("user", user);
+                put("pass", password);
+                put("isEncrypted", "false");
+                put("ForceIP", "true");
+        }};
+
         return post(url, body);
     }
 
@@ -48,7 +52,7 @@ public class EvolvenHttpClient {
             builder.setParameter("json", "true");
             url = builder.build().toURL();
         } catch (URISyntaxException | MalformedURLException e) {
-            return new EvolvenHttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
+            return new EvolvenHttpRequestResult("Failed to construct url. " + e.getMessage());
         }
         Map<String, String> body = Stream.of(new String[][] {
                 {"EvolvenSessionKey", apiKey},
@@ -68,7 +72,7 @@ public class EvolvenHttpClient {
             builder.setParameter("json", "true");
             url = builder.build().toURL();
         } catch (URISyntaxException | MalformedURLException e) {
-            return new EvolvenHttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
+            return new EvolvenHttpRequestResult("Failed to construct url. " + e.getMessage());
         }
 
         body.put("EvolvenSessionKey", apiKey);
@@ -89,7 +93,7 @@ public class EvolvenHttpClient {
             builder.setParameter("json", "true");
             url = builder.build().toURL();
         } catch (URISyntaxException | MalformedURLException e) {
-            return new EvolvenHttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
+            return new EvolvenHttpRequestResult("Failed to construct url. " + e.getMessage());
         }
         body.put("EvolvenSessionKey", apiKey);
         body.put("policy", "true");
@@ -109,7 +113,7 @@ public class EvolvenHttpClient {
             builder.setParameter("json", "true");
             url = builder.build().toURL();
         } catch (URISyntaxException | MalformedURLException e) {
-            return new EvolvenHttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
+            return new EvolvenHttpRequestResult("Failed to construct url. " + e.getMessage());
         }
 
         Map<String, String> body = Stream.of(new String[][] {
@@ -134,12 +138,31 @@ public class EvolvenHttpClient {
             builder.setParameter("json", "true");
             url = builder.build().toURL();
         } catch (URISyntaxException | MalformedURLException e) {
-            return new EvolvenHttpRequestResult("Failed to login to Evolven server. " + e.getMessage());
+            return new EvolvenHttpRequestResult("Failed to construct url. " + e.getMessage());
         }
 
         body.put("EvolvenSessionKey", apiKey);
         body.put("updateExisting", "true");
         body.put("envId", "de");
+        return post(url, body);
+    }
+
+    public IHttpRequestResult uploadPlugin(String apiKey, String base64Zip) {
+        URL url =  null;
+        try {
+            URIBuilder builder = new URIBuilder(baseUrl);
+            builder.setPath("/enlight.server/html/scripts/plugin-manager.jsp");
+            builder.setParameter("action", "upload");
+            builder.setParameter("json", "true");
+            url = builder.build().toURL();
+            logger.debug("url: " + url);
+        } catch (URISyntaxException | MalformedURLException e) {
+            return new EvolvenHttpRequestResult("Failed to construct url. " + e.getMessage());
+        }
+        Map<String, String> body = new HashMap<String, String>() {{
+            put("EvolvenSessionKey", apiKey);
+            put("zipfile", base64Zip);
+        }};
         return post(url, body);
     }
 

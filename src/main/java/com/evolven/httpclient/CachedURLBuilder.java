@@ -17,7 +17,7 @@ public class CachedURLBuilder {
         this.config = config;
     }
 
-    private String scheme = "https";
+    private String scheme;
     private String host;
     private Integer port;
     private String baseUrl;
@@ -54,6 +54,9 @@ public class CachedURLBuilder {
         if (port != null) {
             urlBuilder.setPort(port);
         }
+        if (scheme != null) {
+            urlBuilder.setScheme(scheme);
+        }
         urlBuilder.setPath(path);
         urlBuilder.addParameters(params);
         return urlBuilder.build();
@@ -69,6 +72,9 @@ public class CachedURLBuilder {
         this.host = host;
     }
 
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
     public void setPort(String port) throws InvalidParameterException {
         if (StringUtils.isNullOrBlank(port)) return;
         try {
