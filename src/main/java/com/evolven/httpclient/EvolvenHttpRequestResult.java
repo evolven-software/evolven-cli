@@ -1,7 +1,9 @@
 package com.evolven.httpclient;
 
+import com.evolven.common.StringUtils;
 import com.evolven.httpclient.http.HttpRequestResult;
 import com.evolven.httpclient.http.IHttpRequestResult;
+import com.evolven.logging.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,8 +18,13 @@ public class EvolvenHttpRequestResult implements IHttpRequestResult {
     private String evolvenError = null;
     private boolean evolvenErrorParsed = false;
 
+    private static Logger logger = new Logger(EvolvenHttpRequestResult.class);
+
     protected EvolvenHttpRequestResult(HttpRequestResult httpRequestResult) {
         this.httpRequestResult = httpRequestResult;
+        logger.debug("content: " + httpRequestResult.getContent());
+        logger.debug("status code: " + httpRequestResult.getStatusCode());
+        logger.debug("reason phrase: " + httpRequestResult.getReasonPhrase());
     }
 
     protected EvolvenHttpRequestResult(int statusCode, String reasonPhrase, String content) {
@@ -39,14 +46,17 @@ public class EvolvenHttpRequestResult implements IHttpRequestResult {
     private String getError() {
         if (evolvenErrorParsed) return evolvenError;
         evolvenErrorParsed = true;
-
-        final String genericMessage = "Invalid response.";
+        String content = httpRequestResult.getContent();
+        if (StringUtils.isNullOrBlank(content)) {
+            return null;
+        }
         JsonNode responseNode = null;
         try {
-            responseNode = new ObjectMapper().readTree(httpRequestResult.getContent());
+            responseNode = new ObjectMapper().readTree(content);
         } catch (JsonProcessingException e) {
-            return setEvolvenError(genericMessage);
+            return null;
         }
+        final String genericMessage = "Invalid response.";
         JsonNode nextNode = responseNode.get("Next");
         if (nextNode == null) return setEvolvenError(genericMessage);
         JsonNode errorNode = nextNode.get("Error");

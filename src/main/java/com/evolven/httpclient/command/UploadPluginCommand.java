@@ -115,7 +115,7 @@ public class UploadPluginCommand extends Command {
             String errorMsg = "Failed to upload the plugin with the cached details. Login may be required.";
             String reasonPhrase = result.getReasonPhrase();
             if (!StringUtils.isNullOrBlank(reasonPhrase)) {
-                errorMsg += " " + reasonPhrase;
+                errorMsg += "\nReason phrase: " + reasonPhrase;
             }
             logger.error(errorMsg);
             throw new CommandExceptionNotLoggedIn();
