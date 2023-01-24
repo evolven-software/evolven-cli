@@ -1,10 +1,12 @@
 package com.evolven.cli;
 
 import com.evolven.command.Command;
-import com.evolven.logging.Logger;
+import com.evolven.logging.LoggerManager;
 import picocli.CommandLine;
 
 import com.evolven.command.CommandException;
+
+import java.util.logging.Logger;
 
 @CommandLine.Command(
         name = "create",
@@ -18,7 +20,7 @@ public class EvolvenCommandConfigCreate extends EvolvenCommand {
     @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
     boolean help;
 
-    private Logger logger = new Logger(this);
+    private Logger logger = LoggerManager.getLogger(this);
 
     @CommandLine.Option(names = {"-f", "--force"}, description = "Override the config directory if exists.")
     Boolean force = false;

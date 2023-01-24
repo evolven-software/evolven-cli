@@ -12,15 +12,17 @@ import com.evolven.httpclient.EvolvenHttpClient;
 import com.evolven.httpclient.response.EnvironmentsResponse;
 import com.evolven.httpclient.http.IHttpRequestResult;
 import com.evolven.httpclient.model.Environment;
-import com.evolven.logging.Logger;
+import com.evolven.logging.LoggerManager;
 
 import java.net.MalformedURLException;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SearchCommand extends Command {
     private final static String OPTION_QUERY = "query";
     FileSystemManager fileSystemManager;
-    Logger logger = new Logger(this);
+    Logger logger = LoggerManager.getLogger(this);
     public SearchCommand(FileSystemManager fileSystemManager) {
         this.fileSystemManager = fileSystemManager;
         registerOptions(new String[] {
@@ -57,11 +59,11 @@ public class SearchCommand extends Command {
         try {
             apiKey = config.getApiKey();
         } catch (ConfigException e) {
-            logger.error("Could not get api key. " + e.getMessage());
+            logger.log(Level.SEVERE, "Could not get api key. " + e.getMessage());
             throw new CommandExceptionNotLoggedIn();
         }
         if (StringUtils.isNullOrBlank(apiKey)) {
-            logger.error("Api key not found. Login is required.");
+            logger.log(Level.SEVERE, "Api key not found. Login is required.");
             throw new CommandExceptionNotLoggedIn();
         }
         IHttpRequestResult result = evolvenHttpClient.search(apiKey, query);

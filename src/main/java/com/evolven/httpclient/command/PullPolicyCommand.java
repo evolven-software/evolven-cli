@@ -12,7 +12,7 @@ import com.evolven.httpclient.EvolvenHttpClient;
 import com.evolven.httpclient.EvolvenHttpRequestFilter;
 import com.evolven.httpclient.http.IHttpRequestResult;
 import com.evolven.httpclient.response.PullPolicyResponse;
-import com.evolven.logging.Logger;
+import com.evolven.logging.LoggerManager;
 import com.evolven.policy.Policy;
 import com.evolven.policy.PolicyConfigFactory;
 import com.evolven.policy.PolicyWriter;
@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class PullPolicyCommand extends Command {
     FileSystemManager fileSystemManager;
@@ -37,7 +38,7 @@ public class PullPolicyCommand extends Command {
     public static final String FLAG_COMMENT = "comment";
     public static final String FLAG_ALL = "all";
 
-    Logger logger = new Logger(this);
+    Logger logger = LoggerManager.getLogger(this);
 
     public PullPolicyCommand(FileSystemManager fileSystemManager) {
         registerOptions(new String[] {
@@ -60,9 +61,8 @@ public class PullPolicyCommand extends Command {
         try {
             return builder.build();
         } catch (MalformedURLException e) {
-            throwCommandException("Failed to construct base URL. " + e.getMessage());
+            throw new CommandException("Failed to construct base URL. " + e.getMessage());
         }
-        return null;
     }
 
     @Override
@@ -71,13 +71,13 @@ public class PullPolicyCommand extends Command {
         try {
             config.setEnvironment();
         } catch (ConfigException e) {
-            throwCommandException("Failed to load active environment. " + e.getMessage());
+            throw new CommandException("Failed to load active environment. " + e.getMessage());
         }
         String baseUrl = null;
         try {
             baseUrl = createBaseUrl(config);
         } catch (ConfigException e) {
-            throwCommandException("Failed to construct server base url. " + e.getMessage());
+            throw new CommandException("Failed to construct server base url. " + e.getMessage());
         }
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
         getPolicies(evolvenHttpClient, config);
@@ -88,11 +88,11 @@ public class PullPolicyCommand extends Command {
         try {
             apiKey = config.getApiKey();
         } catch (ConfigException e) {
-            logger.error("Could not get api key. " + e.getMessage());
+            logger.fine("Could not get api key. " + e.getMessage());
             throw new CommandExceptionNotLoggedIn();
         }
         if (StringUtils.isNullOrBlank(apiKey)) {
-            logger.error("Api key not found. Login is required.");
+            logger.fine("Api key not found. Login is required.");
             throw new CommandExceptionNotLoggedIn();
         }
         EvolvenHttpRequestFilter evolvenHttpRequestFilter = new EvolvenHttpRequestFilter();
@@ -106,16 +106,16 @@ public class PullPolicyCommand extends Command {
             if (!StringUtils.isNullOrBlank(reasonPhrase)) {
                 errorMsg += " " + reasonPhrase;
             }
-            logger.error(errorMsg);
+            logger.fine(errorMsg);
             throw new CommandExceptionNotLoggedIn();
 
         }
         try {
             writePolicy(result.getContent());
         } catch (JsonProcessingException e) {
-            throwCommandException("Failed to parse policy. " + e.getMessage());
+            throw new CommandException("Failed to parse policy. " + e.getMessage());
         } catch (IOException e) {
-            throwCommandException("Failed to save policy to the local storage. " + e.getMessage());
+            throw new CommandException("Failed to save policy to the local storage. " + e.getMessage());
         }
     }
 
@@ -123,13 +123,13 @@ public class PullPolicyCommand extends Command {
         File outputDirectory = new File(options.get(OPTION_OUTPUT));
         if (outputDirectory.exists()) {
             if (!outputDirectory.isDirectory()) {
-                throwCommandException("Invalid output location (the location exits and it is not a directory): "
+                throw new CommandException("Invalid output location (the location exits and it is not a directory): "
                        + outputDirectory.toPath());
             }
             if (flags.get(FLAG_FORCE)) {
                 FileUtils.deleteDirectory(outputDirectory);
             } else {
-                throwCommandException("The output location (" + outputDirectory + ") exists already.");
+                throw new CommandException("The output location (" + outputDirectory + ") exists already.");
             }
         }
         Files.createDirectories(outputDirectory.toPath());
@@ -159,11 +159,6 @@ public class PullPolicyCommand extends Command {
             }
             return s;
         }
-    }
-
-    private void throwCommandException(String err) throws CommandException {
-        logger.error(err);
-        throw new CommandException(err);
     }
 
     @Override

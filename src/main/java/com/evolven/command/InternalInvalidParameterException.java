@@ -1,12 +1,16 @@
 package com.evolven.command;
 
-import com.evolven.logging.Logger;
+
+import com.evolven.logging.LoggerManager;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class InternalInvalidParameterException extends RuntimeException {
 
-    private Logger logger = new Logger(this);
+    private Logger logger = LoggerManager.getLogger(this);
     public InternalInvalidParameterException(String param) {
         super("Invalid parameter: " + param + ".");
-        logger.error(getMessage());
+        logger.log(Level.SEVERE, "Invalid parameter: " + param + ".", this);
     }
 }

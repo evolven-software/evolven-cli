@@ -11,7 +11,7 @@ import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.CachedURLBuilder;
 import com.evolven.httpclient.EvolvenHttpClient;
 import com.evolven.httpclient.http.IHttpRequestResult;
-import com.evolven.logging.Logger;
+import com.evolven.logging.LoggerManager;
 import com.evolven.policy.PolicyConfig;
 import com.evolven.policy.PolicyConfigFactory;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class PushPolicyCommand extends Command {
@@ -27,7 +29,7 @@ public class PushPolicyCommand extends Command {
     public static final String OPTION_POLICY_FILENAME = "filename";
     FileSystemManager fileSystemManager;
 
-    Logger logger = new Logger(this);
+    Logger logger = LoggerManager.getLogger(this);
 
     public PushPolicyCommand(FileSystemManager fileSystemManager) {
         this.fileSystemManager = fileSystemManager;
@@ -64,11 +66,11 @@ public class PushPolicyCommand extends Command {
         try {
             apiKey = config.getApiKey();
         } catch (ConfigException e) {
-            logger.error("Could not get api key. " + e.getMessage());
+            logger.log(Level.SEVERE, "Could not get api key. " + e.getMessage());
             throw new CommandExceptionNotLoggedIn();
         }
         if (StringUtils.isNullOrBlank(apiKey)) {
-            logger.error("Api key not found. Login is required.");
+            logger.log(Level.SEVERE, "Api key not found. Login is required.");
             throw new CommandExceptionNotLoggedIn();
         }
         IHttpRequestResult result = evolvenHttpClient.pushPolicy(apiKey, policies);
@@ -78,7 +80,7 @@ public class PushPolicyCommand extends Command {
             if (!StringUtils.isNullOrBlank(reasonPhrase)) {
                 errorMsg += " " + reasonPhrase;
             }
-            logger.error(errorMsg);
+            logger.log(Level.SEVERE, errorMsg);
             throw new CommandExceptionNotLoggedIn();
         }
     }

@@ -1,6 +1,6 @@
 package com.evolven.httpclient.http;
 
-import com.evolven.logging.Logger;
+import com.evolven.logging.LoggerManager;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -18,11 +18,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class HttpClient {
 
-    private static final Logger logger = new Logger(HttpClient.class);
+    private static final Logger logger = LoggerManager.getLogger(HttpClient.class);
 
     private static HttpRequestResult executeRequest(CloseableHttpClient httpClient, HttpUriRequest request) {
         try (CloseableHttpResponse response = httpClient.execute(request)) {
@@ -56,12 +57,7 @@ public class HttpClient {
     }
 
     public static HttpRequestResult post(URL url, Map<String, String> form) {
-        logger.debug("method: POST; url: " + url.toString());
-        form
-                .keySet()
-                .stream()
-                .forEach(k -> logger.debug(k + ": " + form.get(k)));
-
+        logger.fine("method: POST; url: " + url.toString());
         UrlEncodedFormEntity urlEncodedFormEntity = null;
         try {
             urlEncodedFormEntity = new UrlEncodedFormEntity(toNameValuePairList(form));
@@ -72,7 +68,8 @@ public class HttpClient {
     }
 
     public static HttpRequestResult post(URL url, String body) {
-        logger.debug("method: POST; url: " + url.toString() + "; body: " + body);
+        logger.fine("method: POST; url: " + url.toString() + "; body: " + body);
+
         StringEntity stringEntity = null;
         try {
             stringEntity = new StringEntity(body);

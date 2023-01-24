@@ -3,7 +3,7 @@ package com.evolven.httpclient;
 import com.evolven.common.StringUtils;
 import com.evolven.httpclient.http.HttpClient;
 import com.evolven.httpclient.http.IHttpRequestResult;
-import com.evolven.logging.Logger;
+import com.evolven.logging.LoggerManager;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.net.MalformedURLException;
@@ -11,12 +11,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class EvolvenHttpClient {
     private String baseUrl;
-    private Logger logger = new Logger(this);
+    private Logger logger = LoggerManager.getLogger(this);
 
     public EvolvenHttpClient(String baseUrl) {
         this.baseUrl = baseUrl;
@@ -98,9 +99,13 @@ public class EvolvenHttpClient {
         body.put("EvolvenSessionKey", apiKey);
         body.put("policy", "true");
         body.put("wait", "true");
-        body.put("skipMissing", "false");
+        body.put("SkipMissing", "false");
         if (StringUtils.isNullOrBlank(envId)) envId = "de";
         body.put("envId", envId);
+
+        body.entrySet().stream().forEach(es -> {
+            System.out.println(es.getKey() + ":" + es.getValue());
+        });
         return post(url, body);
     }
 
@@ -155,7 +160,7 @@ public class EvolvenHttpClient {
             builder.setParameter("action", "upload");
             builder.setParameter("json", "true");
             url = builder.build().toURL();
-            logger.debug("url: " + url);
+            logger.fine("url: " + url);
         } catch (URISyntaxException | MalformedURLException e) {
             return new EvolvenHttpRequestResult("Failed to construct url. " + e.getMessage());
         }

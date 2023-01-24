@@ -1,6 +1,5 @@
 package com.evolven.filesystem;
 
-import com.evolven.logging.Logger;
 import com.evolven.logging.LoggerManager;
 import com.evolven.policy.PolicyConfigFactory;
 import org.apache.commons.io.FileUtils;
@@ -8,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.logging.Logger;
 
 public class FileSystemManager {
 
@@ -24,31 +24,9 @@ public class FileSystemManager {
     public FileSystemManager() throws IOException {
         configDirectory = getCreateConfigDirectory();
         LoggerManager.createInstance(getCreateLoggerDirectory());
-        logger = new Logger(FileSystemManager.class.getName());
+        logger = LoggerManager.getLogger(this);
         configFile = new File(configDirectory, CONFIG_NAME);
         dumpInitialPolicyConfig(false);
-    }
-
-
-    private void info(String log) {
-        if (logger != null) {
-            logger.info(log);
-        }
-    }
-
-    private void debug(String log) {
-        if (logger != null) {
-            logger.debug(log);
-        }
-    }
-
-    private void error(String log) {
-        if (logger != null) {
-            logger.error(log);
-        } else {
-            System.err.println(log);
-        }
-
     }
 
     public File getCreateLoggerDirectory() throws IOException {
@@ -70,7 +48,7 @@ public class FileSystemManager {
     File getCreateConfigDirectoryAtUserHone() {
         File userDirectory = FileUtils.getUserDirectory();
         if (!userDirectory.exists() || !userDirectory.isDirectory()) {
-            error("File with the name " + userDirectory + " exists (expected user home directory).");
+            logger.info("File with the name " + userDirectory + " exists (expected user home directory).");
             return null;
         }
         File configDirectory = new File(userDirectory, CONFIG_DIRECTORY_NAME);
@@ -108,7 +86,7 @@ public class FileSystemManager {
     public void dumpInitialPolicyConfig(boolean override) throws IOException {
         File policyConfigFile = getPolicyConfigFile();
         if (policyConfigFile.exists() && !override) {
-            info("Policy config file exists and was not overridden.");
+            logger.info("Policy config file exists and was not overridden.");
             return;
         }
         PolicyConfigFactory.dumpInitialConfig(policyConfigFile);

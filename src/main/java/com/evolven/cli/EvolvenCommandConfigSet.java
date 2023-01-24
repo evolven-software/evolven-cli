@@ -1,9 +1,7 @@
 package com.evolven.cli;
 
-import com.evolven.cli.exception.EvolvenCommandException;
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
-import com.evolven.logging.Logger;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = EvolvenCommandConfigSet.COMMAND_NAME)
@@ -28,8 +26,6 @@ public class EvolvenCommandConfigSet extends EvolvenCommand {
 
     @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
     boolean help;
-
-    private Logger logger = new Logger(this);
 
     public EvolvenCommandConfigSet(Command command) {
         super(command);

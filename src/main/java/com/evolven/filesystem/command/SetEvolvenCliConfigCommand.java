@@ -6,7 +6,8 @@ import com.evolven.common.StringUtils;
 import com.evolven.config.ConfigException;
 import com.evolven.filesystem.EvolvenCliConfig;
 import com.evolven.filesystem.FileSystemManager;
-import com.evolven.logging.Logger;
+import com.evolven.logging.LoggerManager;
+import java.util.logging.Logger;
 
 public class SetEvolvenCliConfigCommand extends Command {
 
@@ -15,7 +16,7 @@ public class SetEvolvenCliConfigCommand extends Command {
     public static final String OPTION_VALUE = "value";
     public static final String OPTION_ACTIVE_ENV = "activeEnv";
     FileSystemManager fileSystemManager;
-    Logger logger = new Logger(this);
+    Logger logger = LoggerManager.getLogger(this);
 
     public SetEvolvenCliConfigCommand(FileSystemManager fileSystemManager) {
         this.fileSystemManager = fileSystemManager;
@@ -41,14 +42,14 @@ public class SetEvolvenCliConfigCommand extends Command {
 
         String key = options.get(OPTION_KEY);
         if (StringUtils.isNullOrBlank(key)) {
-            logger.debug("No key is provided.");
+            logger.info("No key is provided.");
             return;
         }
 
         String value = options.get(OPTION_VALUE);
         String env = options.get(OPTION_ENV);
         if (StringUtils.isNullOrBlank(value)) {
-            logger.debug("No value is provided, invoking remove.");
+            logger.info("No value is provided, invoking remove.");
             try {
                 remove(env, key, config);
             } catch (ConfigException e) {
@@ -67,7 +68,7 @@ public class SetEvolvenCliConfigCommand extends Command {
 
     private void remove(String env, String key, EvolvenCliConfig config) throws ConfigException {
         if (StringUtils.isNullOrBlank(env)) {
-            logger.debug("No env is provided.");
+            logger.info("No env is provided.");
             config.remove(key);
         } else {
             config.remove(env, key);
@@ -76,7 +77,7 @@ public class SetEvolvenCliConfigCommand extends Command {
 
     private void set(String env, String key, String value, EvolvenCliConfig config) throws ConfigException {
         if (StringUtils.isNullOrBlank(env)) {
-            logger.debug("No env is provided.");
+            logger.info("No env is provided.");
             config.set(key, value);
         } else {
             config.set(env, key, value);

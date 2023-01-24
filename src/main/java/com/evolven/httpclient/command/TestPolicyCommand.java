@@ -14,7 +14,7 @@ import com.evolven.httpclient.EvolvenHttpClient;
 import com.evolven.httpclient.http.IHttpRequestResult;
 import com.evolven.httpclient.response.EnvironmentsResponse;
 import com.evolven.httpclient.model.Environment;
-import com.evolven.logging.Logger;
+import com.evolven.logging.LoggerManager;
 import com.evolven.policy.PolicyConfig;
 import com.evolven.policy.PolicyConfigFactory;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class TestPolicyCommand extends Command {
@@ -34,7 +35,7 @@ public class TestPolicyCommand extends Command {
     public static final String OPTION_POLICY_FILENAME = "filename";
     public static final String OPTION_QUERY = "query";
     FileSystemManager fileSystemManager;
-    Logger logger = new Logger(this);
+    Logger logger = LoggerManager.getLogger(this);
 
     public TestPolicyCommand(FileSystemManager fileSystemManager) {
         this.fileSystemManager = fileSystemManager;
@@ -120,13 +121,16 @@ public class TestPolicyCommand extends Command {
         }
 
         void print(PrintStream out) {
-            if (result.size() == 0) return;
+            if (result.size() == 0) {
+                out.println("Number of found environments: 0");
+                return;
+            }
             out.println(separator);
             out.println(header);
             out.println(separator);
             result.stream().forEach(r -> out.println(r.toLine(format)));
             out.println(separator);
-            out.println(String.format("Total: %d; %d passed; %d failed", result.size(), result.size() - numFailed, numFailed));
+            out.println(String.format("Number of found environments: %d; %d passed; %d failed", result.size(), result.size() - numFailed, numFailed));
             if (numFailed == 0) out.println("SUCCESS");
             else out.println("FAILED");
 
@@ -139,15 +143,24 @@ public class TestPolicyCommand extends Command {
         try {
             apiKey = config.getApiKey();
         } catch (ConfigException e) {
-            logger.error("Could not get api key. " + e.getMessage());
+            logger.fine("Could not get api key. " + e.getMessage());
             throw new CommandExceptionNotLoggedIn();
         }
         if (StringUtils.isNullOrBlank(apiKey)) {
-            logger.error("Api key not found. Login is required.");
+            logger.fine("Api key not found. Login is required.");
             throw new CommandExceptionNotLoggedIn();
         }
 
-        IHttpRequestResult result = evolvenHttpClient.search(apiKey, query);
+        String queryFinal = policies.getOrDefault("EnvironmentName", "");
+        if (!queryFinal.isEmpty()) {
+            queryFinal = "(" + queryFinal + ") AND ";
+        }
+        String envType = policies.getOrDefault("EnvironmentType", "");
+        if (!envType.isEmpty()) {
+            queryFinal += "(" + envType + ") AND ";
+        }
+        queryFinal += query;
+        IHttpRequestResult result = evolvenHttpClient.search(apiKey, queryFinal);
         if (result.isError()) {
             String errorMsg = "Failed to get policies with the cached details. Login may be required.";
             String reasonPhrase = result.getReasonPhrase();
@@ -156,6 +169,12 @@ public class TestPolicyCommand extends Command {
             }
             throw new CommandException(errorMsg);
         }
+        System.out.println();
+        System.out.println();
+        System.out.println(result.getContent());
+        System.out.println();
+        System.out.println();
+
         EnvironmentsResponse response = new EnvironmentsResponse(result.getContent());
         Iterator<Environment> envIterator = response.iterator();
         PolicyTestResultAccumulator policyTestResultAccumulator = new PolicyTestResultAccumulator();
@@ -170,6 +189,12 @@ public class TestPolicyCommand extends Command {
                 }
                 throw new CommandException(errorMsg);
             }
+
+
+            System.out.println();
+            System.out.printf(result.getContent());
+            System.out.println();
+
             Iterator<Environment> benchmarkResultIterator = new EnvironmentsResponse(result.getContent()).iterator();
             if (benchmarkResultIterator.hasNext()) {
                 policyTestResultAccumulator.add(benchmarkResultIterator.next());

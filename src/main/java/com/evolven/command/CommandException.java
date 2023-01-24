@@ -1,28 +1,32 @@
 package com.evolven.command;
 
+import com.evolven.common.ExceptionUtils;
 import com.evolven.common.StringUtils;
-import com.evolven.logging.Logger;
+import com.evolven.logging.LoggerManager;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CommandException extends Exception {
-    private Logger logger = new Logger(this);
+    private Logger logger = LoggerManager.getLogger(this);
 
     private String msg;
 
     public CommandException(String msg) {
         super(msg);
         this.msg = msg;
-        logger.error(msg);
+        logger.log(Level.SEVERE, msg + "\n" + ExceptionUtils.getStackTrace(this));
     }
 
     public CommandException(String msg, Exception e) {
         super(msg + "\n" + e.getMessage());
         this.msg = msg;
-        logger.error(msg + "\n" + msg);
+        logger.log(Level.SEVERE, msg + "\n" + ExceptionUtils.getStackTrace(this));
     }
 
     public CommandException(Exception e) {
         super(e);
-        logger.error(e.getMessage());
+        logger.log(Level.SEVERE, ExceptionUtils.getStackTrace(this));
     }
 
     @Override

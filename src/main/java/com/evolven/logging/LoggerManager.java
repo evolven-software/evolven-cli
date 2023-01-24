@@ -5,15 +5,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.logging.FileHandler;
 import java.util.logging.LogManager;
-import java.util.logging.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class LoggerManager {
     private static LoggerManager instance = null;
 
     public static final String CONFIG_FILE_NAME = "evolven-logging.properties";
     File loggingDirectory;
-    FileHandler infoFileHandler = null;
-    FileHandler debugFileHandler = null;
+    FileHandler fileHandler = null;
 
     private LoggerManager(File loggingDirectory) {
         this.loggingDirectory = loggingDirectory;
@@ -27,10 +27,8 @@ public class LoggerManager {
             }
         }
         try {
-            infoFileHandler = new FileHandler(new File(loggingDirectory, "evolven-cli-info_%g.log").toString() , 8*1024*1024, 10, true );
-            debugFileHandler = new FileHandler(new File(loggingDirectory, "evolven-cli-debug_%g.log").toString() , 8*1024*1024, 10, true );
-            infoFileHandler.setFormatter(new Formatter());
-            debugFileHandler.setFormatter(new Formatter());
+            fileHandler = new FileHandler(new File(loggingDirectory, "evolven-cli%g.log").toString() , 8*1024*1024, 10, true );
+            fileHandler.setFormatter(new Formatter());
         } catch (IOException e) {
             System.err.println("Failed to load file handler, with the file " + config + "." );
         }
@@ -49,13 +47,9 @@ public class LoggerManager {
     }
 
     protected Logger initializeLogger(Logger logger) {
-        logger.info.setLevel(Level.ALL);
-        logger.debug.setLevel(Level.ALL);
-        if (infoFileHandler != null) {
-            logger.info.addHandler(infoFileHandler);
-        }
-        if (debugFileHandler != null) {
-            logger.debug.addHandler(debugFileHandler);
+        logger.setLevel(Level.ALL);
+        if (fileHandler != null) {
+            logger.addHandler(fileHandler);
         }
         return logger;
     }
@@ -67,5 +61,19 @@ public class LoggerManager {
             instance = new LoggerManager(loggingDirectory);
         }
         return instance;
+    }
+
+    static public Logger getLogger(Object obj) {
+        return getLogger(obj.getClass().getName());
+    }
+
+    static public Logger getLogger(Class c) {
+        return getLogger(c.getName());
+    }
+    static public Logger getLogger(String name) {
+        Logger logger = java.util.logging.Logger.getLogger(name);
+        LoggerManager instance = LoggerManager.getInstance();
+        if (instance != null) instance.initializeLogger(logger);
+        return logger;
     }
 }

@@ -3,13 +3,14 @@ package com.evolven.httpclient;
 import com.evolven.common.StringUtils;
 import com.evolven.httpclient.http.HttpRequestResult;
 import com.evolven.httpclient.http.IHttpRequestResult;
-import com.evolven.logging.Logger;
+import com.evolven.logging.LoggerManager;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.logging.Logger;
 
 public class EvolvenHttpRequestResult implements IHttpRequestResult {
 
@@ -18,13 +19,13 @@ public class EvolvenHttpRequestResult implements IHttpRequestResult {
     private String evolvenError = null;
     private boolean evolvenErrorParsed = false;
 
-    private static Logger logger = new Logger(EvolvenHttpRequestResult.class);
+    private static Logger logger = LoggerManager.getLogger(EvolvenHttpRequestResult.class);
 
     protected EvolvenHttpRequestResult(HttpRequestResult httpRequestResult) {
         this.httpRequestResult = httpRequestResult;
-        logger.debug("content: " + httpRequestResult.getContent());
-        logger.debug("status code: " + httpRequestResult.getStatusCode());
-        logger.debug("reason phrase: " + httpRequestResult.getReasonPhrase());
+        logger.fine("content: " + httpRequestResult.getContent());
+        logger.fine("status code: " + httpRequestResult.getStatusCode());
+        logger.fine("reason phrase: " + httpRequestResult.getReasonPhrase());
     }
 
     protected EvolvenHttpRequestResult(int statusCode, String reasonPhrase, String content) {

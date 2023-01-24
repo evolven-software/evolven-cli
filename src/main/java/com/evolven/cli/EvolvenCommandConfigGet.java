@@ -1,10 +1,9 @@
 package com.evolven.cli;
 
-import com.evolven.cli.exception.EvolvenCommandException;
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
-import com.evolven.logging.Logger;
 import picocli.CommandLine;
+
 
 @CommandLine.Command(name = EvolvenCommandConfigGet.COMMAND_NAME)
 public class EvolvenCommandConfigGet extends EvolvenCommand {
@@ -19,8 +18,6 @@ public class EvolvenCommandConfigGet extends EvolvenCommand {
 
     @CommandLine.Option(names = {"-a", "--active-env"}, description = "Show the name of the active environment.")
     Boolean activeEnv;
-
-    private Logger logger = new Logger(this);
 
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;

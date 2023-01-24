@@ -11,14 +11,9 @@ import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.CachedURLBuilder;
 import com.evolven.httpclient.EvolvenHttpClient;
 import com.evolven.httpclient.http.IHttpRequestResult;
-import com.evolven.logging.Logger;
-import com.evolven.policy.PolicyConfig;
-import com.evolven.policy.PolicyConfigFactory;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ser.Serializers;
+import com.evolven.logging.LoggerManager;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -26,8 +21,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -36,7 +31,7 @@ public class UploadPluginCommand extends Command {
     public static final String OPTION_PLUGIN_PATH = "path";
     FileSystemManager fileSystemManager;
 
-    Logger logger = new Logger(this);
+    Logger logger = LoggerManager.getLogger(this);
 
     public static final String[] requiredFiles = {
             "plugin.yml"
@@ -99,25 +94,25 @@ public class UploadPluginCommand extends Command {
         try {
             apiKey = config.getApiKey();
         } catch (ConfigException e) {
-            logger.error("Could not get api key. " + e.getMessage());
+            logger.log(Level.SEVERE, "Could not get api key. ", e);
             throw new CommandExceptionNotLoggedIn();
         }
-        logger.debug("Api key is: " + apiKey);
+        logger.fine("Api key is: " + apiKey);
         if (StringUtils.isNullOrBlank(apiKey)) {
-            logger.error("Api key not found. Login is required.");
+            logger.log(Level.SEVERE, "Api key not found. Login is required.");
             throw new CommandExceptionNotLoggedIn();
         }
 
-        logger.debug("Calling evolvenHttpClient.uploadPlugin...");
+        logger.fine("Calling evolvenHttpClient.uploadPlugin...");
         IHttpRequestResult result = evolvenHttpClient.uploadPlugin(apiKey, base64Zip);
         if (result.isError()) {
-            logger.debug("evolvenHttpClient.uploadPlugin returned an error...");
+            logger.fine("evolvenHttpClient.uploadPlugin returned an error...");
             String errorMsg = "Failed to upload the plugin with the cached details. Login may be required.";
             String reasonPhrase = result.getReasonPhrase();
             if (!StringUtils.isNullOrBlank(reasonPhrase)) {
                 errorMsg += "\nReason phrase: " + reasonPhrase;
             }
-            logger.error(errorMsg);
+            logger.log(Level.SEVERE, errorMsg);
             throw new CommandExceptionNotLoggedIn();
         }
     }
@@ -132,7 +127,7 @@ public class UploadPluginCommand extends Command {
                         zos.write(Files.readAllBytes(path));
                         zos.closeEntry();
                     } catch (IOException e) {
-                        logger.error("Failed to load the plugin. " + e.getMessage());
+                        logger.log(Level.SEVERE, "Failed to load the plugin.", e);
                         throw new RuntimeException(e);
                     }
                 });
@@ -143,7 +138,7 @@ public class UploadPluginCommand extends Command {
         try {
             addFolderToZip(Paths.get(path), zos);
         } catch (RuntimeException e) {
-            logger.error("Failed to load the plugin. " + e.getMessage());
+            logger.log(Level.SEVERE, "Failed to load the plugin. ", e);
             throw new IOException(e);
         }
         zos.close();

@@ -8,18 +8,21 @@ import com.evolven.filesystem.command.GetEvolvenCliConfigCommand;
 import com.evolven.filesystem.command.LogoutCommand;
 import com.evolven.filesystem.command.SetEvolvenCliConfigCommand;
 import com.evolven.httpclient.command.*;
-import com.evolven.logging.Logger;
+import com.evolven.logging.LoggerManager;
 import picocli.CommandLine;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.logging.Logger;
 
 public class Main {
     static Logger logger;
 
     public static void main(String[] args) throws IOException {
+        Arrays.stream(args).forEach(System.out::println);
         FileSystemManager fileSystemManager = new FileSystemManager();
-        logger = new Logger(Main.class.getName());
-        logger.debug("Creating cli interface...");
+        logger = LoggerManager.getLogger(Main.class);
+        logger.fine("Creating cli interface...");
         CommandLine cli = new CommandLine(new EvolvenCommandLine())
                 .addSubcommand("login", new EvolvenCommandLogin(new LoginCommand(fileSystemManager)))
                 .addSubcommand("logout", new EvolvenCommandLogout(new LogoutCommand(fileSystemManager)))
@@ -38,7 +41,7 @@ public class Main {
                         .addSubcommand("test", new EvolvenCommandPolicyTest(new TestPolicyCommand(fileSystemManager)))
                 );
 
-        logger.debug("Executing command...");
+        logger.fine("Executing command...");
         cli.setExecutionExceptionHandler(new ExecutionExceptionHandler());
         System.exit(cli.execute(args));
     }
