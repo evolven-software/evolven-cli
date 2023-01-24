@@ -12,9 +12,20 @@ public class Environment {
     String name;
     @JsonProperty("Host")
     String host;
-
     @JsonProperty("Compliance")
     boolean compliance;
+
+    public String getValue() {
+        if (value == null) return "";
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    @JsonProperty("Value")
+    String value;
 
     public boolean isCompliance() {
         return compliance;

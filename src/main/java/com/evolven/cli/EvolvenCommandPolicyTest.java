@@ -10,7 +10,7 @@ public class EvolvenCommandPolicyTest extends EvolvenCommand {
     @CommandLine.Option(names = {"-f", "--policy-file"}, required = true, description = "Path to a policy file.")
     String filename;
 
-    @CommandLine.Option(names = {"-c", "--criterion"}, required = true, description = "The policy will be tested on the environments that answer this search criterion.")
+    @CommandLine.Option(names = {"-c", "--criterion"}, required = false, description = "The policy will be tested on the environments that answer this search criterion.")
     String query;
 
     @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")

@@ -47,11 +47,19 @@ public class SearchCommand extends Command {
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
         Iterator<Environment> iterator = search(evolvenHttpClient, config, options.get(OPTION_QUERY));
         String format = "%-30s| %-30s| %s";
-        System.out.println(String.format(format, "Name:", "EnvID:", "Host:"));
+        int num = 0;
+        StringBuilder sb = new StringBuilder();
         while (iterator.hasNext()) {
             Environment env = iterator.next();
-            System.out.println(String.format(format, env.getName(), env.getEnvId(), env.getHost()));
+            sb.append(String.format(format, env.getName(), env.getEnvId(), env.getHost()));
+            sb.append("\n");
+            num++;
         }
+        if (num > 0) {
+            System.out.println(String.format(format, "Name:", "EnvID:", "Host:"));
+            System.out.println(sb);
+        }
+        System.out.println("Number of found environments: " + num);
     }
 
     private Iterator<Environment> search(EvolvenHttpClient evolvenHttpClient, EvolvenCliConfig config, String query) throws CommandException {
@@ -66,9 +74,13 @@ public class SearchCommand extends Command {
             logger.log(Level.SEVERE, "Api key not found. Login is required.");
             throw new CommandExceptionNotLoggedIn();
         }
+        return search(evolvenHttpClient, apiKey, query);
+    }
+
+    protected static Iterator<Environment> search(EvolvenHttpClient evolvenHttpClient, String apiKey, String query) throws CommandException {
         IHttpRequestResult result = evolvenHttpClient.search(apiKey, query);
         if (result.isError()) {
-            String errorMsg = "Failed to get policies with the cached details. Login may be required.";
+            String errorMsg = "Failed to perform search with the cached details. Login may be required.";
             String reasonPhrase = result.getReasonPhrase();
             if (!StringUtils.isNullOrBlank(reasonPhrase)) {
                 errorMsg += " " + reasonPhrase;
@@ -78,6 +90,7 @@ public class SearchCommand extends Command {
         EnvironmentsResponse response = new EnvironmentsResponse(result.getContent());
         return response.iterator();
     }
+
 
     @Override
     public String getName() {

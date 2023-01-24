@@ -1,5 +1,6 @@
 package com.evolven.cli.exception;
 
+import com.evolven.common.ExceptionUtils;
 import com.evolven.logging.LoggerManager;
 import picocli.CommandLine;
 
@@ -15,8 +16,9 @@ public class ExecutionExceptionHandler implements CommandLine.IExecutionExceptio
         String msg = ex.getMessage();
         int status = DEFAULT_RETURN_STATUS;
         if (ex instanceof EvolvenCommandException) status = ((EvolvenCommandException) ex).getStatus();
+        logger.log(Level.SEVERE, ExceptionUtils.getStackTrace(ex));
         if (!msg.isEmpty()) {
-            logger.log(Level.SEVERE, msg, ex);
+            logger.log(Level.SEVERE, msg);
             System.err.println(msg);
         }
         logger.log(Level.SEVERE, "Exit status: " + status);

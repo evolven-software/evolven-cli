@@ -19,7 +19,6 @@ public class Main {
     static Logger logger;
 
     public static void main(String[] args) throws IOException {
-        Arrays.stream(args).forEach(System.out::println);
         FileSystemManager fileSystemManager = new FileSystemManager();
         logger = LoggerManager.getLogger(Main.class);
         logger.fine("Creating cli interface...");

@@ -102,10 +102,6 @@ public class EvolvenHttpClient {
         body.put("SkipMissing", "false");
         if (StringUtils.isNullOrBlank(envId)) envId = "de";
         body.put("envId", envId);
-
-        body.entrySet().stream().forEach(es -> {
-            System.out.println(es.getKey() + ":" + es.getValue());
-        });
         return post(url, body);
     }
 

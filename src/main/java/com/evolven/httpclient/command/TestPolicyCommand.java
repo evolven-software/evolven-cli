@@ -69,55 +69,39 @@ public class TestPolicyCommand extends Command {
         testPolicy(evolvenHttpClient, config,  policies, options.get(OPTION_QUERY));
     }
 
-    private boolean testPolicy(EvolvenHttpClient evolvenHttpClient, String apiKey, Map<String, String> policies, String envId, boolean printHeader) throws CommandException {
-            IHttpRequestResult result = evolvenHttpClient.testPolicy(apiKey, policies, envId);
-            if (result.isError()) {
-                String errorMsg = "Failed to run benchmark for the environment with the id: \"" + envId + "\"." ;
-                String reasonPhrase = result.getReasonPhrase();
-                if (!StringUtils.isNullOrBlank(reasonPhrase)) {
-                    errorMsg += " " + reasonPhrase;
-                }
-                throw new CommandException(errorMsg);
-            }
-            Iterator<Environment> benchmarkResultIterator = new EnvironmentsResponse(result.getContent()).iterator();
-            PolicyTestResultAccumulator policyTestResultAccumulator = new PolicyTestResultAccumulator();
-            if (benchmarkResultIterator.hasNext()) {
-                policyTestResultAccumulator.add(benchmarkResultIterator.next());
-            }
-            return printHeader;
-    }
-
-
     class PolicyTestResultAccumulator {
 
         class PolicyTestResult {
             String envName;
             String envId;
+            String value;
             boolean testResult;
-            public PolicyTestResult(String envName, String envId, boolean testResult) {
+            public PolicyTestResult(String envName, String envId, boolean testResult, String value) {
                 this.envName = envName;
                 this.envId = envId;
                 this.testResult = testResult;
+                this.value = value;
             }
 
             public String toLine(String format) {
                 String line = String.format(format,
                         envName,
                         envId,
-                        testResult ? "PASSED" : "FAILED");
+                        testResult ? "PASSED" : "FAILED",
+                        value);
                 return envName + line.substring(envName.length()).replace(' ', '.');
             }
         }
 
-        String format = "%-60s|%-10s|%s";
-        String header = String.format(format, "Name:", "EnvID:", "Result:");
+        String format = "%-35s|%-35s|%-8s|%s";
+        String header = String.format(format, "Host", "Environment:", "Result:", "Value:");
         String separator = StringUtils.repeat("-", header.length() + 5);
         int numFailed = 0;
         List<PolicyTestResult> result = new ArrayList<>();
 
         public void add(Environment env) {
             numFailed += env.isCompliance() ? 0 : 1;
-            result.add(new PolicyTestResult(env.getName(), env.getEnvId(), env.isCompliance()));
+            result.add(new PolicyTestResult(env.getHost(), env.getName(), env.isCompliance(), env.getValue()));
         }
 
         void print(PrintStream out) {
@@ -135,9 +119,8 @@ public class TestPolicyCommand extends Command {
             else out.println("FAILED");
 
         }
-
-
     }
+
     private void testPolicy(EvolvenHttpClient evolvenHttpClient, EvolvenCliConfig config, Map<String, String> policies, String query) throws CommandException {
         String apiKey = null;
         try {
@@ -150,7 +133,6 @@ public class TestPolicyCommand extends Command {
             logger.fine("Api key not found. Login is required.");
             throw new CommandExceptionNotLoggedIn();
         }
-
         String queryFinal = policies.getOrDefault("EnvironmentName", "");
         if (!queryFinal.isEmpty()) {
             queryFinal = "(" + queryFinal + ") AND ";
@@ -160,27 +142,11 @@ public class TestPolicyCommand extends Command {
             queryFinal += "(" + envType + ") AND ";
         }
         queryFinal += query;
-        IHttpRequestResult result = evolvenHttpClient.search(apiKey, queryFinal);
-        if (result.isError()) {
-            String errorMsg = "Failed to get policies with the cached details. Login may be required.";
-            String reasonPhrase = result.getReasonPhrase();
-            if (!StringUtils.isNullOrBlank(reasonPhrase)) {
-                errorMsg += " " + reasonPhrase;
-            }
-            throw new CommandException(errorMsg);
-        }
-        System.out.println();
-        System.out.println();
-        System.out.println(result.getContent());
-        System.out.println();
-        System.out.println();
-
-        EnvironmentsResponse response = new EnvironmentsResponse(result.getContent());
-        Iterator<Environment> envIterator = response.iterator();
+        Iterator<Environment> envIterator = SearchCommand.search(evolvenHttpClient, apiKey, queryFinal);
         PolicyTestResultAccumulator policyTestResultAccumulator = new PolicyTestResultAccumulator();
         while (envIterator.hasNext()) {
             Environment env = envIterator.next();
-            result = evolvenHttpClient.testPolicy(apiKey, policies, env.getEnvId());
+            IHttpRequestResult result = evolvenHttpClient.testPolicy(apiKey, policies, env.getEnvId());
             if (result.isError()) {
                 String errorMsg = "Failed to run benchmark for the environment with the name \"" + env.getName() + "\"." ;
                 String reasonPhrase = result.getReasonPhrase();
@@ -189,12 +155,6 @@ public class TestPolicyCommand extends Command {
                 }
                 throw new CommandException(errorMsg);
             }
-
-
-            System.out.println();
-            System.out.printf(result.getContent());
-            System.out.println();
-
             Iterator<Environment> benchmarkResultIterator = new EnvironmentsResponse(result.getContent()).iterator();
             if (benchmarkResultIterator.hasNext()) {
                 policyTestResultAccumulator.add(benchmarkResultIterator.next());
