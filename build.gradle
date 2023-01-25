@@ -70,6 +70,7 @@ task archive(type: Zip) {
     from "$buildDir/output"
 }
 
+archive.dependsOn(copyInstallers)
 
 test {
     useJUnitPlatform()
