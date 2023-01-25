@@ -51,10 +51,7 @@ jobs:
     - name: Publish to GitHub Packages
       run: |
         echo TARAS
-        gh auth login
-        echo LOGED IN
         gh release create Release-${{ env.GITHUB_REF_NAME }} build/dist/evolven-cli.zip --latest --title "evolven-cli" --notes "latest release"
       env:
-        USERNAME: ${{ github.actor }}
-        TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
