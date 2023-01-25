@@ -64,6 +64,13 @@ task copyInstallers(type: Copy) {
 }
 build.dependsOn(copyInstallers)
 
+task archive(type: Zip) {
+    archiveFileName = "evolven-cli.zip"
+    destinationDirectory = file("$buildDir/dist")
+    from "$buildDir/output"
+}
+
+
 test {
     useJUnitPlatform()
 }
