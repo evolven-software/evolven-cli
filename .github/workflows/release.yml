@@ -49,7 +49,7 @@ jobs:
         echo Release-${GITHUB_REF_NAME}
         echo Release-${GITHUB_REF}
         echo ${{ secrets.GITHUB_TOKEN }}
-        echo ${env.GITHUB_TOKEN}
+        echo ${{env.GITHUB_TOKEN}}
         echo ls build/dist/
         gh release create Release-${GITHUB_REF_NAME} build/dist/evolven-cli.zip --latest --title "evolven-cli" --notes "latest release"
       env:
