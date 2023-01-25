@@ -1,10 +1,23 @@
 # evolven-cli
 
 ## Build from the source
+### Build
 ```bash
 # In the root directory run the command
-gradle build
+gradlew build
 ```
+### Create a zip archive with the program
+```bash
+# In the root directory run the command
+gradlew archive
+```
+### Deploy
+```bash
+# In the root directory run the command
+git tag -a vMAJOR.MINOR.PATH -m "RELEASE MASSAGE"
+git push origin vMAJOR.MINOR.PATH
+```
+The binaries will be published under https://github.com/evolven-software/evolven-cli/releases.
 
 
 ## Installation
