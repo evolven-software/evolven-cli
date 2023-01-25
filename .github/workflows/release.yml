@@ -46,6 +46,9 @@ jobs:
         
     - name: Publish to GitHub Packages
       run: |
+        echo Release-${{ env.GITHUB_REF_NAME }}
+        echo ${{ secrets.GITHUB_TOKEN }}
+        echo ${GITHUB_TOKEN}
         gh release create Release-${{ env.GITHUB_REF_NAME }} build/dist/evolven-cli.zip --latest --title "evolven-cli" --notes "latest release"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
