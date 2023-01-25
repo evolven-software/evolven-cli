@@ -17,33 +17,33 @@ public class EvolvenCommandLogin extends EvolvenCommand {
     public static final String COMMAND_EXAMPLE = "evolven " + COMMAND_NAME + " -H <host> -p <password> -u <username> -e <label>";
 
     @CommandLine.Option(names = {"-U", "--url"}, description = "The full url of the server.")
-    String url;
+    private String url;
 
     @CommandLine.Option(names = {"-u", "--username"}, description = "Username.")
-    String username;
+    private String username;
 
     @CommandLine.Option(names = {"-H", "--host"}, description = "Host.")
-    String host;
+    private String host;
 
     @CommandLine.Option(names = {"-p", "--password"}, required = true, description = "Password.")
-    String password;
+    private String password;
     @CommandLine.Option(names = {"-s", "--schema"}, defaultValue = "https", description = "The url schema (ex.: https).")
-    String schema;
+    private String schema;
 
     @CommandLine.Option(names = {"-e", "--env"}, defaultValue = "test", description = "Environment label.")
-    String env;
+    private String env;
 
     @CommandLine.Option(names = {"-P", "--port"}, description = "Password.")
-    Short port;
+    private Short port;
 
     @CommandLine.Option(names = {"-C", "--skip-caching"}, description = "Skip caching data.")
-    Boolean skipCache;
+    private Boolean skipCache;
 
     @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
-    boolean help;
+    private boolean help;
 
     @Spec
-    CommandSpec spec;
+    private CommandSpec spec;
 
     public EvolvenCommandLogin(Command command) {
         super(command);

@@ -18,12 +18,12 @@ public class EvolvenCommandConfigCreate extends EvolvenCommand {
     CommandLine.Model.CommandSpec spec;
 
     @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
-    boolean help;
+    private boolean help;
 
     private Logger logger = LoggerManager.getLogger(this);
 
     @CommandLine.Option(names = {"-f", "--force"}, description = "Override the config directory if exists.")
-    Boolean force = false;
+    private Boolean force = false;
 
     public EvolvenCommandConfigCreate(Command command) {
         super(command);

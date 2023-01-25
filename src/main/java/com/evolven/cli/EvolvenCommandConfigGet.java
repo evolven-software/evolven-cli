@@ -7,23 +7,23 @@ import picocli.CommandLine;
 
 @CommandLine.Command(name = EvolvenCommandConfigGet.COMMAND_NAME)
 public class EvolvenCommandConfigGet extends EvolvenCommand {
-    final static String COMMAND_NAME = "get";
+    protected final static String COMMAND_NAME = "get";
 
 
     @CommandLine.Option(names = {"-e", "--env"}, description = "The environment from which to get the value.")
-    String env;
+    private String env;
 
     @CommandLine.Option(names = {"-k", "--key"}, description = "The name of the value of interest.")
-    String key;
+    private String key;
 
     @CommandLine.Option(names = {"-a", "--active-env"}, description = "Show the name of the active environment.")
-    Boolean activeEnv;
+    private Boolean activeEnv;
 
     @CommandLine.Spec
-    CommandLine.Model.CommandSpec spec;
+    private CommandLine.Model.CommandSpec spec;
 
     @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
-    boolean help;
+    private boolean help;
 
     public EvolvenCommandConfigGet(Command command) {
         super(command);
