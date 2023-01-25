@@ -47,7 +47,6 @@ jobs:
     - name: Publish to GitHub Packages
       run: |
         echo Release-${{ env.GITHUB_REF_NAME }}
-        echo Release-${{ GITHUB_REF_NAME }}
         echo ${{ secrets.GITHUB_TOKEN }}
         echo ${GITHUB_TOKEN}
         echo ls build/dist/
