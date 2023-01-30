@@ -1,24 +1,15 @@
 # evolven-cli
 
 ## Build from the source
+### prerequisites
+* java (version >= 8)
+* gradle (tested with version 7.4)
+
 ### Build
 ```bash
 # In the root directory run the command
-gradlew build
+./gradlew build
 ```
-### Create a zip archive with the program
-```bash
-# In the root directory run the command
-gradlew archive
-```
-### Deploy
-```bash
-# In the root directory run the command
-git tag -a vMAJOR.MINOR.PATH -m "RELEASE MASSAGE"
-git push origin vMAJOR.MINOR.PATH
-```
-The binaries will be published under https://github.com/evolven-software/evolven-cli/releases.
-
 
 ## Installation
 #### Windows
@@ -43,8 +34,11 @@ There are two ways to install evolven-cli on a Windows machine:
 1. Copy evolven-cli directory to a desired location.
 2. Update the .bashrc (or similar configuration file for your shell) with the new PATH variable that contains evolven-cli/bin directory. Example:
 ```bash
-cp -r evolven-cli ~/
-echo "export PATH=${PATH}:~/evolven-cli/bin" >> ~/.bashrc
+destination_directory=~/ # or any other directory
+cp -r evolven-cli ${destination_directory}
+cmd="export PATH=\${PATH}:${destination_directory}/bin"
+echo ${cmd} >> ~/.bashrc
+eval ${cmd}
 ```
 3. Restart the shell.
 
@@ -131,3 +125,18 @@ evolven.bat policy test -f .\evolven-policies\_Access.yaml -c "host:sergey"
 ```bash
 evolven.bat policy push -f .\evolven-policies\Taras-test-AAAS__Connectivity_Check___Windows__WinRM-Enabled.yaml
 ```
+
+## For developers
+### Create a zip archive with the program
+```bash
+# In the root directory run the command
+gradlew archive
+```
+### Deploy
+```bash
+# In the root directory run the command
+git tag -a vMAJOR.MINOR.PATH -m "RELEASE MASSAGE"
+git push origin vMAJOR.MINOR.PATH
+```
+The binaries will be published under https://github.com/evolven-software/evolven-cli/releases.
+
