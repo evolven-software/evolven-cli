@@ -4,6 +4,7 @@ import com.evolven.command.Command;
 import com.evolven.command.CommandException;
 import com.evolven.command.CommandExceptionNotLoggedIn;
 import com.evolven.command.CommandFailure;
+import com.evolven.common.Spinner;
 import com.evolven.common.StringUtils;
 import com.evolven.common.YAMLUtils;
 import com.evolven.config.ConfigException;
@@ -88,21 +89,27 @@ public class TestPolicyCommand extends Command {
         }
         Iterator<Environment> envIterator = SearchCommand.search(evolvenHttpClient, apiKey, query);
         PolicyTestResultAccumulator policyTestResultAccumulator = new PolicyTestResultAccumulator();
-        while (envIterator.hasNext()) {
-            Environment env = envIterator.next();
-            IHttpRequestResult result = evolvenHttpClient.testPolicy(apiKey, policies, env.getEnvId());
-            if (result.isError()) {
-                String errorMsg = "Failed to run benchmark for the environment with the name \"" + env.getName() + "\"." ;
-                String reasonPhrase = result.getReasonPhrase();
-                if (!StringUtils.isNullOrBlank(reasonPhrase)) {
-                    errorMsg += " " + reasonPhrase;
+        Spinner spinner = new Spinner();
+        try {
+            while (envIterator.hasNext()) {
+                spinner.start();
+                Environment env = envIterator.next();
+                IHttpRequestResult result = evolvenHttpClient.testPolicy(apiKey, policies, env.getEnvId());
+                if (result.isError()) {
+                    String errorMsg = "Failed to run benchmark for the environment with the name \"" + env.getName() + "\"." ;
+                    String reasonPhrase = result.getReasonPhrase();
+                    if (!StringUtils.isNullOrBlank(reasonPhrase)) {
+                        errorMsg += " " + reasonPhrase;
+                    }
+                    throw new CommandException(errorMsg);
                 }
-                throw new CommandException(errorMsg);
+                Iterator<Environment> benchmarkResultIterator = new EnvironmentsResponse(result.getContent()).iterator();
+                if (benchmarkResultIterator.hasNext()) {
+                    policyTestResultAccumulator.add(benchmarkResultIterator.next());
+                }
             }
-            Iterator<Environment> benchmarkResultIterator = new EnvironmentsResponse(result.getContent()).iterator();
-            if (benchmarkResultIterator.hasNext()) {
-                policyTestResultAccumulator.add(benchmarkResultIterator.next());
-            }
+        } finally {
+            spinner.stop();
         }
         policyTestResultAccumulator.print(System.out);
         if (policyTestResultAccumulator.numFailed > 0) {
