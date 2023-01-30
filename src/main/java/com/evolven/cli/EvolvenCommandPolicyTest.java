@@ -16,7 +16,7 @@ public class EvolvenCommandPolicyTest extends EvolvenCommand {
 
     @CommandLine.Option(names = {"-s", "--use-policy-scope"}, description = "Use scope from the policy. " +
             "In such a case the \"--cretirion\" parameter will define the sub-group of the scope defined in the policy")
-    protected boolean scope;
+    protected Boolean scope;
 
     @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
     protected boolean help;

@@ -70,7 +70,7 @@ public class TestPolicyCommand extends Command {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        ParametersProcessor parametersProcessor = new ParametersProcessor(config,  policies, options.get(OPTION_QUERY));
+        ParametersProcessor parametersProcessor = new ParametersProcessor(policies, options.get(OPTION_QUERY));
         testPolicy(evolvenHttpClient, config,  parametersProcessor.getPolicies(), parametersProcessor.getQuery());
     }
 
@@ -124,11 +124,9 @@ public class TestPolicyCommand extends Command {
     class ParametersProcessor {
         private Map<String, String> policies;
         private String query;
-        private EvolvenCliConfig config;
-        public ParametersProcessor(EvolvenCliConfig config, Map<String, String> policies, String query) {
+        public ParametersProcessor(Map<String, String> policies, String query) {
             this.policies = policies;
             this.query = query == null ? "" : query;
-            this.config = config;
         }
 
         private List<String> toList(String... queries) {
@@ -136,23 +134,20 @@ public class TestPolicyCommand extends Command {
         }
 
         public String getQuery() {
-            if (flags.get(FLAG_USE_POLICY_SCOPE)) {
-                String name = policies.get(PolicyConfigDefault.ENVIRONMENT_NAME_FIELD);
-                String envType = policies.get(PolicyConfigDefault.ENVIRONMENT_TYPE_FIELD);
-                List<String> queries = toList(name, envType, query);
-                if (queries.size() == 0) return "";
-                if (queries.size() == 1) return queries.get(0);
-                return queries.stream().map(q -> "(" + q + ")").collect(Collectors.joining(" AND "));
-            }
-            return query;
+            List<String> queries = toList(
+                    "ad=" + policies.get(PolicyConfigDefault.ENVIRONMENT_TYPE_FIELD),
+                    flags.get(FLAG_USE_POLICY_SCOPE) ? policies.get(PolicyConfigDefault.ENVIRONMENT_NAME_FIELD) : "",
+                    query);
+            if (queries.size() == 1) return queries.get(0);
+            return queries.stream().map(q -> "(" + q + ")").collect(Collectors.joining(" AND "));
         }
 
         public Map<String, String> getPolicies() {
-            policies.remove(PolicyConfigDefault.ENVIRONMENT_NAME_FIELD);
-            policies.remove(PolicyConfigDefault.ENVIRONMENT_TYPE_FIELD);
+            if (!flags.get(FLAG_USE_POLICY_SCOPE)) {
+                policies.remove(PolicyConfigDefault.ENVIRONMENT_NAME_FIELD);
+            }
             return policies;
         }
-
     }
 
     class PolicyTestResultAccumulator {
