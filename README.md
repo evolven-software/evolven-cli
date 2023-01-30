@@ -54,6 +54,7 @@ evolven.sh --help
 
 
 ## Typical workflow
+(On linux systems replace use evolven.sh command instead evolven.bat)
 ```bash
 # login
 evolven.bat login -H host13.evolven.com -p PASS -u evolven -e test
@@ -61,8 +62,12 @@ evolven.bat login -H host13.evolven.com -p PASS -u evolven -e test
 evolven.bat policy pull -n "@Access"
 # edit the policy in a text editor
 # ...
-# test the policy on a hosts that answers a search query
+# test the policy on hosts that match a search query
 evolven.bat policy test -f .\evolven-policies\_Access.yaml -c "host:sergey"
+# test the policy on hosts that match a the scope that is defined in the policy
+evolven.bat policy test -f .\evolven-policies\_Access.yaml -s
+# test the policy on hosts that match a the scope that is defined in the policy and the search criteria
+evolven.bat policy test -f .\evolven-policies\_Access.yaml -s -c "host:sergey"
 # push the policy to the Evolven server
 evolven.bat policy push -f .\evolven-policies\_Access.yaml
 # Logout from the Evolven server
