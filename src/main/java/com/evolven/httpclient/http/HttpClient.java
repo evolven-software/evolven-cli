@@ -6,15 +6,21 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 
 import java.io.*;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,12 +44,24 @@ public class HttpClient {
         }
     }
 
+    static CloseableHttpClient createHttpClient() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        String skipSSLCheck = System.getenv("EVOLVEN_CLI_SKIP_SSL_CHECK");
+        if (skipSSLCheck == null) {
+            return HttpClients.createDefault();
+        }
+        return HttpClients
+                .custom()
+                .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build())
+                .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                .build();
+    }
+
     private static HttpRequestResult post(URL url, HttpEntity httpEntity) {
-        try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+        try (CloseableHttpClient httpClient = createHttpClient()) {
             HttpPost httpPost = new HttpPost(url.toString());
             httpPost.setEntity(httpEntity);
-            return executeRequest(httpclient, httpPost);
-        } catch (IOException e) {
+            return executeRequest(httpClient, httpPost);
+        } catch (IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
             return new HttpRequestResult("Failed to execute POST request. " + e.getMessage());
         }
     }
@@ -77,66 +95,6 @@ public class HttpClient {
             return new HttpRequestResult("Failed to execute POST request. " + e.getMessage());
         }
         return post(url, stringEntity);
-    }
-
-    public static void loginTest() {
-
-        try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-            HttpPost httpPost = new HttpPost("https://host13.evolven.com/enlight.server/next/api?action=login");
-            List<NameValuePair> nvps = new ArrayList<>();
-            nvps.add(new BasicNameValuePair("json", "true"));
-            nvps.add(new BasicNameValuePair("user", "evolven"));
-            nvps.add(new BasicNameValuePair("pass", "Mdls1997"));
-            nvps.add(new BasicNameValuePair("isEncrypted", "false"));
-            nvps.add(new BasicNameValuePair("ForceIP", "true"));
-            try {
-                UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nvps);
-                String input = new BufferedReader(new InputStreamReader(urlEncodedFormEntity.getContent()))
-                        .lines().collect(Collectors.joining("&"));
-                httpPost.setEntity(urlEncodedFormEntity);
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
-
-            try (CloseableHttpResponse response2 = httpclient.execute(httpPost)) {
-                System.out.println(response2.getStatusLine().getStatusCode() + " " + response2.getStatusLine().getReasonPhrase());
-                HttpEntity entity2 = response2.getEntity();
-                InputStream inputStream = entity2.getContent();
-                String result = new BufferedReader(new InputStreamReader(inputStream))
-                        .lines().collect(Collectors.joining("\n"));
-                EntityUtils.consume(entity2);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void getPoliciesTest() {
-        try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-            HttpPost httpPost = new HttpPost("https://host13.evolven.com/enlight.server/next/policy?action=get&json=true");
-            List<NameValuePair> nvps = new ArrayList<>();
-            nvps.add(new BasicNameValuePair("EvolvenSessionKey", "f641f8e507c14e734ce3e2740e7fd2a88b1bcc73"));
-            try {
-                UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nvps);
-                String input = new BufferedReader(new InputStreamReader(urlEncodedFormEntity.getContent()))
-                        .lines().collect(Collectors.joining("&"));
-                httpPost.setEntity(urlEncodedFormEntity);
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
-
-            try (CloseableHttpResponse response2 = httpclient.execute(httpPost)) {
-                System.out.println(response2.getStatusLine().getStatusCode() + " " + response2.getStatusLine().getReasonPhrase());
-                HttpEntity entity2 = response2.getEntity();
-                InputStream inputStream = entity2.getContent();
-                String result = new BufferedReader(new InputStreamReader(inputStream))
-                        .lines().collect(Collectors.joining("\n"));
-                System.out.println(result);
-                EntityUtils.consume(entity2);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }

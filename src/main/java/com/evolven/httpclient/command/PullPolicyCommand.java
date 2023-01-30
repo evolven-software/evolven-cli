@@ -126,9 +126,7 @@ public class PullPolicyCommand extends Command {
                 throw new CommandException("Invalid output location (the location exits and it is not a directory): "
                        + outputDirectory.toPath());
             }
-            if (flags.get(FLAG_FORCE)) {
-                FileUtils.deleteDirectory(outputDirectory);
-            } else {
+            if (!flags.get(FLAG_FORCE)) {
                 throw new CommandException("The output location (" + outputDirectory + ") exists already.");
             }
         }

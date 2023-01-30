@@ -9,23 +9,23 @@ public class EvolvenCommandConfigSet extends EvolvenCommand {
     final static String COMMAND_NAME = "set";
 
     @CommandLine.Option(names = {"-a", "--active-env"}, description = "Set active environment from which to get the value.")
-    private String activeEnv;
+    protected String activeEnv;
 
     @CommandLine.Option(names = {"-e", "--env"}, description = "The environment from which to get the value.")
-    private String env;
+    protected String env;
 
     @CommandLine.Option(names = {"-k", "--key"}, description = "The key to be set.")
-    private String key;
+    protected String key;
 
     @CommandLine.Option(names = {"-v", "--value"}, description = "The value to be set.")
-    private String value;
+    protected String value;
 
 
     @CommandLine.Spec
-    private CommandLine.Model.CommandSpec spec;
+    protected CommandLine.Model.CommandSpec spec;
 
     @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
-    private boolean help;
+    protected boolean help;
 
     public EvolvenCommandConfigSet(Command command) {
         super(command);

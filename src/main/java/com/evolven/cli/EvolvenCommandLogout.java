@@ -10,17 +10,17 @@ import picocli.CommandLine.Spec;
 public class EvolvenCommandLogout extends EvolvenCommand {
 
     @CommandLine.Option(names = {"-e", "--env"}, defaultValue = "test", description = "Environment label.")
-    String env;
+    protected String env;
 
     public EvolvenCommandLogout(Command command) {
         super(command);
     }
 
     @CommandLine.Option(names = {"-h", "--help"}, description = "Show help")
-    boolean help;
+    protected boolean help;
 
     @Spec
-    CommandSpec spec;
+    protected CommandSpec spec;
 
     @Override
     public void execute() throws CommandException {

@@ -23,18 +23,9 @@ class PolicyConfigMapper {
     public static final String SKIP_READONLY_KEY = "skip-readonly";
     public static final String APPEND_ORIGINAL_POLICY_AS_COMMENT_KEY = "append-original-policy-as-comment";
 
-    public static final Set<String> level0Keys = new HashSet<>(
-            Arrays.asList(
-                    EDITABLE_FIELDS_KEY,
-                    GROUPINGS_KEY,
-                    SKIP_READONLY_KEY,
-                    APPEND_ORIGINAL_POLICY_AS_COMMENT_KEY
-            )
-    );
-
     private static final PolicyConfigModel emptyResult = new PolicyConfigModel();
 
-    PolicyConfigModel read(File file) {
+    public static PolicyConfigModel read(File file) {
         ObjectNode configRoot = null;
         try {
             configRoot = YAMLUtils.load(file);
@@ -49,35 +40,21 @@ class PolicyConfigMapper {
         );
     }
 
-    void write(File file, PolicyConfigModel model) throws IOException {
+    public static void write(File file, PolicyConfigModel model) throws IOException {
         YAMLMapper mapper = new YAMLMapper(YAMLFactory.builder()
                 .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
                 .build());
         write(file, model, mapper);
     }
 
-    void write(File file, PolicyConfigModel model, YAMLMapper mapper) throws IOException {
+    private static void write(File file, PolicyConfigModel model, YAMLMapper mapper) throws IOException {
         mapper.writeValue(file, map(model, mapper));
-    }
-
-
-    private static JsonNode map(PolicyConfigModel model, ObjectNode node) {
-        YAMLMapper mapper = new YAMLMapper(YAMLFactory.builder()
-                .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
-                .build());
-        return map(model, node, mapper);
     }
 
     private static JsonNode map(PolicyConfigModel model, YAMLMapper mapper) {
         return map(model, mapper.createObjectNode(), mapper);
     }
 
-    private static JsonNode map(PolicyConfigModel model) {
-        YAMLMapper mapper = new YAMLMapper(YAMLFactory.builder()
-                .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
-                .build());
-        return map(model, mapper);
-    }
     private static JsonNode map(PolicyConfigModel model, ObjectNode node, YAMLMapper mapper) {
         ArrayNode editableFieldsNode = mapper.createArrayNode();
         model.editablePolicyFields.stream().forEach(v -> editableFieldsNode.add(v));
@@ -98,19 +75,19 @@ class PolicyConfigMapper {
         return node;
     }
 
-    private Boolean getSkipReadOnly(JsonNode node) {
+    private static Boolean getSkipReadOnly(JsonNode node) {
         JsonNode skipReadOnly = node.get(SKIP_READONLY_KEY);
         if (skipReadOnly == null) return null;
         return skipReadOnly.asBoolean();
     }
 
-    private Boolean getAppendOriginalPolicyAsCommentKey(JsonNode node) {
+    private static Boolean getAppendOriginalPolicyAsCommentKey(JsonNode node) {
         JsonNode appendOriginalPolicyAsCommentKey = node.get(APPEND_ORIGINAL_POLICY_AS_COMMENT_KEY);
         if (appendOriginalPolicyAsCommentKey == null) return null;
         return appendOriginalPolicyAsCommentKey.asBoolean();
     }
 
-    private List<String> getEditablePolicyFields(JsonNode node) {
+    private static List<String> getEditablePolicyFields(JsonNode node) {
         JsonNode editableFieldsNode = node.get(EDITABLE_FIELDS_KEY);
         if (editableFieldsNode == null) return null;
         List<String> editableFields = new ArrayList<>();
@@ -122,7 +99,7 @@ class PolicyConfigMapper {
         return editableFields;
     }
 
-    private Map<String, String> getComments(ObjectNode node) {
+    private static Map<String, String> getComments(ObjectNode node) {
         JsonNode groupingsNode = node.get(GROUPINGS_KEY);
         if (groupingsNode == null) return null;
         Map<String, String> comments = new LinkedHashMap<>();
@@ -140,7 +117,7 @@ class PolicyConfigMapper {
         return comments;
     }
 
-    private LinkedHashMap<String, List<String>> getGroupings(ObjectNode node) {
+    private static LinkedHashMap<String, List<String>> getGroupings(ObjectNode node) {
         JsonNode groupingsNode = node.get(GROUPINGS_KEY);
         if (groupingsNode == null) return null;
         LinkedHashMap<String, List<String>> groupings = new LinkedHashMap<>();

@@ -4,12 +4,16 @@ import com.evolven.cli.exception.EvolvenCommandException;
 import com.evolven.cli.exception.EvolvenCommandExceptionLogin;
 import com.evolven.command.*;
 import com.evolven.common.Enum;
+import com.evolven.common.ExceptionUtils;
+import com.evolven.logging.LoggerManager;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 public abstract class EvolvenCommand implements Runnable {
     private Command command;
+    private static Logger logger = LoggerManager.getLogger(EvolvenCommand.class);
 
     public EvolvenCommand() {}
     public EvolvenCommand(Command command) {
@@ -28,7 +32,6 @@ public abstract class EvolvenCommand implements Runnable {
 
     void addOption(Object option, Object parent) throws InvalidParameterException {
         if (option == null) return;
-
         command.addOption(getFieldName(option, parent), (String) option);
     }
 
@@ -38,8 +41,13 @@ public abstract class EvolvenCommand implements Runnable {
     }
 
     void addOption(String name, String value) throws InvalidParameterException {
-        if (name == null) return;
+        if (value == null) return;
         command.addOption(name, value);
+    }
+
+    void addOption(String name, Short value) throws InvalidParameterException {
+        if (value == null) return;
+        command.addOption(name, Short.toString(value));
     }
 
     void addOption(Short option, Object parent) throws InvalidParameterException {
@@ -61,6 +69,11 @@ public abstract class EvolvenCommand implements Runnable {
         command.addOption(getFieldName(option, parent), Integer.toString(option));
     }
 
+    protected void  addFlag(String name, Boolean flag) throws InvalidParameterException {
+        if (flag == null) flag = false;
+        command.addFlag(name, flag);
+    }
+
     protected void  addFlag(Boolean flag, Object parent) throws InvalidParameterException {
         if (flag == null) return;
         String fn = getFieldName(flag, parent);
@@ -68,19 +81,20 @@ public abstract class EvolvenCommand implements Runnable {
     }
 
     protected static java.lang.reflect.Field getField(Object fieldObject, Object parent) {
-
         java.lang.reflect.Field[] allFields = parent.getClass().getDeclaredFields();
         for (java.lang.reflect.Field field : allFields) {
             Object currentFieldObject;
             try {
                 currentFieldObject = field.get(parent);
             } catch (Exception e) {
+                logger.severe(ExceptionUtils.getStackTrace(e));
                 return null;
             }
             if (System.identityHashCode(fieldObject) == System.identityHashCode(currentFieldObject)) {
                 return field;
             }
         }
+        logger.severe("field not found!");
         return null;
     }
     protected static String getFieldName(Object fieldObject, Object parent) {

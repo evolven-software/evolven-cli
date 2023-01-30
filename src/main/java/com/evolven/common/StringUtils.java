@@ -25,4 +25,12 @@ public class StringUtils {
     public static String repeat(char c, int repetitions) {
         return repeat(Character.toString(c), repetitions);
     }
+
+    public static String stripQuotes(String value) {
+        if (value.length() < 2) return value;
+        if (value.charAt(0) == '"' &&  value.charAt(value.length() - 1) == '"') {
+            return value.substring(1, value.length() - 1);
+        }
+        return value;
+    }
 }

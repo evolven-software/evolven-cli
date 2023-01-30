@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-class PolicyConfigDefault extends PolicyConfig {
+public class PolicyConfigDefault extends PolicyConfig {
 
     public static final String NAME_FIELD = "Name";
     public static final String COMMENT_FIELD = "Comment";
@@ -46,6 +46,6 @@ class PolicyConfigDefault extends PolicyConfig {
         put(SCOPE_GROUPING_FIELD, "Scope");
     }};
     public PolicyConfigDefault() {
-        super(editablePolicyFields, groupings, comments, true, true);
+        super(editablePolicyFields, groupings, comments, true, false);
     }
 }

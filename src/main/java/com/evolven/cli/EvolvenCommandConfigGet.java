@@ -11,19 +11,19 @@ public class EvolvenCommandConfigGet extends EvolvenCommand {
 
 
     @CommandLine.Option(names = {"-e", "--env"}, description = "The environment from which to get the value.")
-    private String env;
+    protected String env;
 
     @CommandLine.Option(names = {"-k", "--key"}, description = "The name of the value of interest.")
-    private String key;
+    protected String key;
 
     @CommandLine.Option(names = {"-a", "--active-env"}, description = "Show the name of the active environment.")
-    private Boolean activeEnv;
+    protected Boolean activeEnv;
 
     @CommandLine.Spec
-    private CommandLine.Model.CommandSpec spec;
+    protected CommandLine.Model.CommandSpec spec;
 
     @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
-    private boolean help;
+    protected boolean help;
 
     public EvolvenCommandConfigGet(Command command) {
         super(command);

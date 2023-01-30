@@ -25,6 +25,8 @@ public class PolicyWriter {
         this.config = config;
         mapper = new YAMLMapper(YAMLFactory.builder()
                 .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+                .disable(YAMLGenerator.Feature.SPLIT_LINES)
+                //.enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
                 .build());
     }
 

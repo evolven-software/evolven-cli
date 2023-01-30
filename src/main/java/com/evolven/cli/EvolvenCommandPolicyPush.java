@@ -8,13 +8,13 @@ import picocli.CommandLine;
 public class EvolvenCommandPolicyPush extends EvolvenCommand {
 
     @CommandLine.Option(names = {"-f", "--policy-file"}, required = true, description = "Path to a policy file.")
-    String filename;
+    protected String filename;
 
     @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
-    boolean help;
+    protected boolean help;
 
     @CommandLine.Spec
-    CommandLine.Model.CommandSpec spec;
+    protected CommandLine.Model.CommandSpec spec;
 
     public EvolvenCommandPolicyPush(Command command) {
         super(command);

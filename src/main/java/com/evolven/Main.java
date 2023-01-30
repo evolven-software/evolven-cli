@@ -12,7 +12,6 @@ import com.evolven.logging.LoggerManager;
 import picocli.CommandLine;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 public class Main {

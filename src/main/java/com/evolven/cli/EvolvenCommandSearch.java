@@ -10,14 +10,13 @@ import picocli.CommandLine.Model.CommandSpec;
 public class EvolvenCommandSearch extends EvolvenCommand {
 
     @CommandLine.Option(names = {"-q", "--query"}, required = true, description = "Evolven search query.")
-    String query;
+    protected String query;
 
     @Spec
-    CommandSpec spec;
+    protected CommandSpec spec;
 
     @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
-
-    boolean help;
+    protected boolean help;
 
     public EvolvenCommandSearch(Command command) {
         super(command);

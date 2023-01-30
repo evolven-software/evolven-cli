@@ -8,13 +8,13 @@ import picocli.CommandLine;
 public class EvolvenCommandPluginUpload extends EvolvenCommand {
 
     @CommandLine.Option(names = {"-p", "--plugin-path"}, required = true, description = "Path to a plugin directory.")
-    String path;
+    protected String path;
 
     @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
-    boolean help;
+    protected boolean help;
 
     @CommandLine.Spec
-    CommandLine.Model.CommandSpec spec;
+    protected CommandLine.Model.CommandSpec spec;
 
     public EvolvenCommandPluginUpload(Command command) {
         super(command);

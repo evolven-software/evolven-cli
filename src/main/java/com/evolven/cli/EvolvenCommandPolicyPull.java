@@ -11,29 +11,25 @@ import java.io.File;
 public class EvolvenCommandPolicyPull extends EvolvenCommand {
 
     @CommandLine.Option(names = {"-o", "--output-directory"}, defaultValue = "evolven-policies", description = "The output file/directory. The location will be created.")
-    File output;
+    protected File output;
 
     @CommandLine.Option(names = {"-n", "--policy-name"}, required = false, description = "Policy name")
-    String name;
+    protected String name;
 
     @CommandLine.Option(names = {"-f", "--force"}, description = "Override the file if exists.")
-    boolean force;
-
-  //  @CommandLine.Option(names = {"-F", "--format"}, defaultValue = "YAML", description = "The output format." +
-  //          " Options: \n\t1. JSON. \n\t2. Yaml.\n\t3) ROW")
-  //  PolicyFormat format;
+    protected Boolean force;
 
     @CommandLine.Option(names = {"-a", "--show-readonly-fields"}, description = "Reflect all (readonly and writable) fields.")
-    boolean all;
+    protected Boolean all;
 
     @CommandLine.Option(names = {"-c", "--show-full-as-comment"}, description = "Append the original policy as a comment.")
-    boolean comment;
+    protected Boolean comment;
 
     @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
-    boolean help;
+    protected boolean help;
 
     @CommandLine.Spec
-    CommandLine.Model.CommandSpec spec;
+    protected CommandLine.Model.CommandSpec spec;
     public EvolvenCommandPolicyPull(Command command) {
         super(command);
     }
@@ -45,7 +41,6 @@ public class EvolvenCommandPolicyPull extends EvolvenCommand {
             return;
         }
         addOption(output, this);
-        //addOption(format, this);
         addOption(name, this);
         addFlag(all, this);
         addFlag(comment, this);

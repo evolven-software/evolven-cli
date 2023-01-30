@@ -7,10 +7,10 @@ import java.io.PrintStream;
 public class EvolvenCommandsGroup extends EvolvenCommand {
 
     @CommandLine.Spec
-    CommandLine.Model.CommandSpec spec;
+    protected CommandLine.Model.CommandSpec spec;
 
     @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
-    boolean help;
+    protected boolean help;
 
     @Override
     public void execute() throws CommandException {

@@ -17,6 +17,7 @@ import com.evolven.httpclient.model.Environment;
 import com.evolven.logging.LoggerManager;
 import com.evolven.policy.PolicyConfig;
 import com.evolven.policy.PolicyConfigFactory;
+import com.evolven.policy.PolicyConfigDefault;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.File;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -34,6 +36,7 @@ public class TestPolicyCommand extends Command {
 
     public static final String OPTION_POLICY_FILENAME = "filename";
     public static final String OPTION_QUERY = "query";
+    public static final String FLAG_USE_POLICY_SCOPE = "scope";
     FileSystemManager fileSystemManager;
     Logger logger = LoggerManager.getLogger(this);
 
@@ -43,6 +46,7 @@ public class TestPolicyCommand extends Command {
                 OPTION_POLICY_FILENAME,
                 OPTION_QUERY,
         });
+        registerFlag(FLAG_USE_POLICY_SCOPE);
     }
 
     @Override
@@ -66,7 +70,89 @@ public class TestPolicyCommand extends Command {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        testPolicy(evolvenHttpClient, config,  policies, options.get(OPTION_QUERY));
+        ParametersProcessor parametersProcessor = new ParametersProcessor(config,  policies, options.get(OPTION_QUERY));
+        testPolicy(evolvenHttpClient, config,  parametersProcessor.getPolicies(), parametersProcessor.getQuery());
+    }
+
+    private void testPolicy(EvolvenHttpClient evolvenHttpClient, EvolvenCliConfig config, Map<String, String> policies, String query) throws CommandException {
+        String apiKey = null;
+        try {
+            apiKey = config.getApiKey();
+        } catch (ConfigException e) {
+            logger.fine("Could not get api key. " + e.getMessage());
+            throw new CommandExceptionNotLoggedIn();
+        }
+        if (StringUtils.isNullOrBlank(apiKey)) {
+            logger.fine("Api key not found. Login is required.");
+            throw new CommandExceptionNotLoggedIn();
+        }
+        Iterator<Environment> envIterator = SearchCommand.search(evolvenHttpClient, apiKey, query);
+        PolicyTestResultAccumulator policyTestResultAccumulator = new PolicyTestResultAccumulator();
+        while (envIterator.hasNext()) {
+            Environment env = envIterator.next();
+            IHttpRequestResult result = evolvenHttpClient.testPolicy(apiKey, policies, env.getEnvId());
+            if (result.isError()) {
+                String errorMsg = "Failed to run benchmark for the environment with the name \"" + env.getName() + "\"." ;
+                String reasonPhrase = result.getReasonPhrase();
+                if (!StringUtils.isNullOrBlank(reasonPhrase)) {
+                    errorMsg += " " + reasonPhrase;
+                }
+                throw new CommandException(errorMsg);
+            }
+            Iterator<Environment> benchmarkResultIterator = new EnvironmentsResponse(result.getContent()).iterator();
+            if (benchmarkResultIterator.hasNext()) {
+                policyTestResultAccumulator.add(benchmarkResultIterator.next());
+            }
+        }
+        policyTestResultAccumulator.print(System.out);
+        if (policyTestResultAccumulator.numFailed > 0) {
+            throw new CommandFailure();
+        }
+    }
+
+    public Map<String, String> fromYamlFile(String filepath) throws IOException {
+        File policyYamlFile = new File(filepath);
+        PolicyConfig policyConfig = PolicyConfigFactory.createConfig(fileSystemManager.getPolicyConfigFile());
+        JsonNode rule = YAMLUtils.load(policyYamlFile);
+        return policyConfig.getEditablePolicyFields()
+                .stream()
+                .filter(f -> rule.get(f) != null)
+                .collect(Collectors.toMap(f -> f, f -> rule.get(f).asText()));
+    }
+
+
+    class ParametersProcessor {
+        private Map<String, String> policies;
+        private String query;
+        private EvolvenCliConfig config;
+        public ParametersProcessor(EvolvenCliConfig config, Map<String, String> policies, String query) {
+            this.policies = policies;
+            this.query = query == null ? "" : query;
+            this.config = config;
+        }
+
+        private List<String> toList(String... queries) {
+            return Arrays.stream(queries).filter(q -> !StringUtils.isNullOrBlank(q)).collect(Collectors.toList());
+        }
+
+        public String getQuery() {
+            if (flags.get(FLAG_USE_POLICY_SCOPE)) {
+                String name = policies.get(PolicyConfigDefault.ENVIRONMENT_NAME_FIELD);
+                String envType = policies.get(PolicyConfigDefault.ENVIRONMENT_TYPE_FIELD);
+                List<String> queries = toList(name, envType, query);
+                if (queries.size() == 0) return "";
+                if (queries.size() == 1) return queries.get(0);
+                return queries.stream().map(q -> "(" + q + ")").collect(Collectors.joining(" AND "));
+            }
+            return query;
+        }
+
+        public Map<String, String> getPolicies() {
+            policies.remove(PolicyConfigDefault.ENVIRONMENT_NAME_FIELD);
+            policies.remove(PolicyConfigDefault.ENVIRONMENT_TYPE_FIELD);
+            return policies;
+        }
+
     }
 
     class PolicyTestResultAccumulator {
@@ -120,64 +206,9 @@ public class TestPolicyCommand extends Command {
 
         }
     }
-
-    private void testPolicy(EvolvenHttpClient evolvenHttpClient, EvolvenCliConfig config, Map<String, String> policies, String query) throws CommandException {
-        String apiKey = null;
-        try {
-            apiKey = config.getApiKey();
-        } catch (ConfigException e) {
-            logger.fine("Could not get api key. " + e.getMessage());
-            throw new CommandExceptionNotLoggedIn();
-        }
-        if (StringUtils.isNullOrBlank(apiKey)) {
-            logger.fine("Api key not found. Login is required.");
-            throw new CommandExceptionNotLoggedIn();
-        }
-        String queryFinal = policies.getOrDefault("EnvironmentName", "");
-        if (!queryFinal.isEmpty()) {
-            queryFinal = "(" + queryFinal + ") AND ";
-        }
-        String envType = policies.getOrDefault("EnvironmentType", "");
-        if (!envType.isEmpty()) {
-            queryFinal += "(" + envType + ") AND ";
-        }
-        queryFinal += query;
-        Iterator<Environment> envIterator = SearchCommand.search(evolvenHttpClient, apiKey, queryFinal);
-        PolicyTestResultAccumulator policyTestResultAccumulator = new PolicyTestResultAccumulator();
-        while (envIterator.hasNext()) {
-            Environment env = envIterator.next();
-            IHttpRequestResult result = evolvenHttpClient.testPolicy(apiKey, policies, env.getEnvId());
-            if (result.isError()) {
-                String errorMsg = "Failed to run benchmark for the environment with the name \"" + env.getName() + "\"." ;
-                String reasonPhrase = result.getReasonPhrase();
-                if (!StringUtils.isNullOrBlank(reasonPhrase)) {
-                    errorMsg += " " + reasonPhrase;
-                }
-                throw new CommandException(errorMsg);
-            }
-            Iterator<Environment> benchmarkResultIterator = new EnvironmentsResponse(result.getContent()).iterator();
-            if (benchmarkResultIterator.hasNext()) {
-                policyTestResultAccumulator.add(benchmarkResultIterator.next());
-            }
-        }
-        policyTestResultAccumulator.print(System.out);
-        if (policyTestResultAccumulator.numFailed > 0) {
-            throw new CommandFailure();
-        }
-    }
-
-    public Map<String, String> fromYamlFile(String filepath) throws IOException {
-        File policyYamlFile = new File(filepath);
-        PolicyConfig policyConfig = PolicyConfigFactory.createConfig(fileSystemManager.getPolicyConfigFile());
-        JsonNode rule = YAMLUtils.load(policyYamlFile);
-        return policyConfig.getEditablePolicyFields()
-                .stream()
-                .filter(f -> rule.get(f) != null)
-                .collect(Collectors.toMap(f -> f, f -> rule.get(f).asText()));
-    }
-
     @Override
     public String getName() {
         return "push";
     }
+
 }
