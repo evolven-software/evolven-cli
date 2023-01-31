@@ -9,7 +9,7 @@ if ( [string]::IsNullOrWhiteSpace($launcherPath)  ) {
     Write-Error "Cannot resolve launcher location."
     exit 1
 }
-$ArgumentList = @("-Dcom.sun.net.ssl.checkRevocation=false", "-Dappdynamics.force.default.ssl.certificate.validation=false", "-jar", "`"$launcherPath`"")
+$ArgumentList = @("-jar", "`"$launcherPath`"")
 foreach ($arg in $args) {
     $ArgumentList += "`"$arg`""
 }
