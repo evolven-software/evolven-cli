@@ -131,6 +131,17 @@ evolven.bat policy test -f .\evolven-policies\_Access.yaml -c "host:sergey"
 evolven.bat policy push -f .\evolven-policies\Taras-test-AAAS__Connectivity_Check___Windows__WinRM-Enabled.yaml
 ```
 
+### Evolven CLI configuration
+The configuration file for the cli is located at "~/.evolven-cli/policy-config.yaml" usually.
+
+* Configure the editable fields (list) with the "editable-fields" property. 
+* Configure groupings of the fields (fields that are separated by a comment) with the "groupings" property.
+* Configure the printing of the original policy with "append-original-policy-as-comment" property.
+* Configure the fields the output of readonly fields with "skip-readonly".
+
+#### Evolven CLI logs
+The logs are located at "~/.evolven-cli/log/" usually.
+
 ## For developers
 ### Create a zip archive with the program
 ```bash
