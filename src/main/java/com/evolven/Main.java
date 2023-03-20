@@ -32,6 +32,8 @@ public class Main {
                 )
                 .addSubcommand("plugin", new CommandLine(new EvolvenCommandPlugin())
                         .addSubcommand("upload", new EvolvenCommandPluginUpload(new UploadPluginCommand(fileSystemManager)))
+                        .addSubcommand("list", new EvolvenCommandPluginList(new ListPluginsCommand(fileSystemManager)))
+                        .addSubcommand("delete", new EvolvenCommandPluginDelete(new DeletePluginCommand(fileSystemManager)))
                 )
                 .addSubcommand("policy", new CommandLine(new EvolvenCommandPolicy())
                         .addSubcommand("pull", new EvolvenCommandPolicyPull(new PullPolicyCommand(fileSystemManager)))

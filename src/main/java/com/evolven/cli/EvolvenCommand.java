@@ -50,6 +50,11 @@ public abstract class EvolvenCommand implements Runnable {
         command.addOption(name, Short.toString(value));
     }
 
+    void addOption(Long option, Object parent) throws InvalidParameterException {
+        if (option == null) return;
+        command.addOption(getFieldName(option, parent), Long.toString(option));
+    }
+
     void addOption(Short option, Object parent) throws InvalidParameterException {
         if (option == null) return;
         command.addOption(getFieldName(option, parent), Short.toString(option));

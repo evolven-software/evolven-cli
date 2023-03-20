@@ -148,6 +148,40 @@ public class EvolvenHttpClient {
         return post(url, body);
     }
 
+    public IHttpRequestResult deletePlugin(String apiKey, Long id) {
+        URL url =  null;
+        try {
+            URIBuilder builder = new URIBuilder(baseUrl);
+            builder.setPath("/enlight.server/html/scripts/plugin-manager.jsp");
+            builder.setParameter("action", "delete");
+            builder.setParameter("json", "true");
+            url = builder.build().toURL();
+        } catch (URISyntaxException | MalformedURLException e) {
+            return new EvolvenHttpRequestResult("Failed to construct url. " + e.getMessage());
+        }
+        Map<String, String> body = new HashMap<String, String>() {{
+            put("EvolvenSessionKey", apiKey);
+            put("id", Long.toString(id));
+        }};
+        return post(url, body);
+    }
+    public IHttpRequestResult listPlugins(String apiKey) {
+        URL url =  null;
+        try {
+            URIBuilder builder = new URIBuilder(baseUrl);
+            builder.setPath("/enlight.server/html/scripts/plugin-manager.jsp");
+            builder.setParameter("action", "list");
+            builder.setParameter("json", "true");
+            url = builder.build().toURL();
+        } catch (URISyntaxException | MalformedURLException e) {
+            return new EvolvenHttpRequestResult("Failed to construct url. " + e.getMessage());
+        }
+        Map<String, String> body = new HashMap<String, String>() {{
+            put("EvolvenSessionKey", apiKey);
+        }};
+        return post(url, body);
+    }
+
     public IHttpRequestResult uploadPlugin(String apiKey, String base64Zip) {
         URL url =  null;
         try {
