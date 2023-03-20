@@ -11,12 +11,18 @@ import com.evolven.httpclient.CachedURLBuilder;
 import com.evolven.httpclient.EvolvenHttpClient;
 import com.evolven.httpclient.http.IHttpRequestResult;
 import com.evolven.logging.LoggerManager;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ListPluginsCommand extends Command {
+    private static final int MAX_LENGTH_PLUGIN_NAME = 60;
 
     Logger logger = LoggerManager.getLogger(this);
 
@@ -70,7 +76,20 @@ public class ListPluginsCommand extends Command {
             logger.log(Level.SEVERE, errorMsg);
             throw new CommandExceptionNotLoggedIn();
         }
-        System.out.println(result.getContent());
+        try {
+            HashMap<String,List<Map<String,String>>> map = new GsonBuilder().disableHtmlEscaping().create().fromJson(result.getContent(),new TypeToken<HashMap<String,List<Map<String,String>>>>() {}.getType());
+            List<Map<String,String>> plugins = map.get("plugins");
+            if (plugins.isEmpty()) {
+                System.out.println("No plugins");
+            } else {
+                int length = plugins.stream().map(plugin -> plugin.get("name").length()).filter(len -> len <= MAX_LENGTH_PLUGIN_NAME).max(Integer::compare).orElse(0);
+                for (Map<String, String> plugin : plugins) {
+                    System.out.printf("%-" + length + "s    | %s%n", plugin.get("name"), plugin.get("id"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(result.getContent());
+        }
     }
 
     @Override

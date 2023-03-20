@@ -1,10 +1,9 @@
 package com.evolven.cli;
 
 import com.evolven.command.Command;
+import com.evolven.command.CommandException;
 import com.evolven.logging.LoggerManager;
 import picocli.CommandLine;
-
-import com.evolven.command.CommandException;
 
 import java.util.logging.Logger;
 

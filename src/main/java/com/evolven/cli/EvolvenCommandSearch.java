@@ -3,8 +3,8 @@ package com.evolven.cli;
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
 import picocli.CommandLine;
-import picocli.CommandLine.Spec;
 import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Spec;
 
 @CommandLine.Command(name = "search", header = "Search Evolven entity.")
 public class EvolvenCommandSearch extends EvolvenCommand {

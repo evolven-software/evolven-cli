@@ -2,7 +2,6 @@ package com.evolven.cli;
 
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
-import com.evolven.common.PolicyFormat;
 import picocli.CommandLine;
 
 import java.io.File;

@@ -59,7 +59,8 @@ public class EvolvenHttpRequestResult implements IHttpRequestResult {
         }
         final String genericMessage = "Invalid response.";
         JsonNode nextNode = responseNode.get("Next");
-        if (nextNode == null) return setEvolvenError(genericMessage);
+//        if (nextNode == null) return setEvolvenError(genericMessage);
+        if (nextNode == null) return null;
         JsonNode errorNode = nextNode.get("Error");
         if (errorNode == null) return null;
         JsonNode msgNode = errorNode.get("Message");

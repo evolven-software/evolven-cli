@@ -2,11 +2,7 @@ package com.evolven.command;
 
 import com.evolven.common.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 public abstract class Command {
 
