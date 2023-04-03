@@ -77,9 +77,10 @@ public class ListPluginsCommand extends Command {
             throw new CommandExceptionNotLoggedIn();
         }
         try {
-            HashMap<String,List<Map<String,String>>> map = new GsonBuilder().disableHtmlEscaping().create().fromJson(result.getContent(),new TypeToken<HashMap<String,List<Map<String,String>>>>() {}.getType());
-            List<Map<String,String>> plugins = map.get("plugins");
-            if (plugins.isEmpty()) {
+            HashMap<String,HashMap<String,List<Map<String,String>>>> map = new GsonBuilder().disableHtmlEscaping().create().fromJson(result.getContent(),new TypeToken<HashMap<String,HashMap<String,List<Map<String,String>>>>>() {}.getType());
+            HashMap<String, List<Map<String, String>>> next = map.get("Next");
+            List<Map<String,String>> plugins = next == null ? null : next.get("plugins");
+            if (plugins == null || plugins.isEmpty()) {
                 System.out.println("No plugins");
             } else {
                 int length = plugins.stream().map(plugin -> plugin.get("name").length()).filter(len -> len <= MAX_LENGTH_PLUGIN_NAME).max(Integer::compare).orElse(0);
