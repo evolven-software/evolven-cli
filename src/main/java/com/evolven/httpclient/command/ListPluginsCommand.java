@@ -89,7 +89,7 @@ public class ListPluginsCommand extends Command {
                 }
             }
         } catch (Exception e) {
-            System.out.println(result.getContent());
+            throw new CommandException("Failed obtain plugins list. " + result.getContent());
         }
     }
 
