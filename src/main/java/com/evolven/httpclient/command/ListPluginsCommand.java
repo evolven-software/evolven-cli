@@ -84,6 +84,8 @@ public class ListPluginsCommand extends Command {
                 System.out.println("No plugins");
             } else {
                 int length = plugins.stream().map(plugin -> plugin.get("name").length()).filter(len -> len <= MAX_LENGTH_PLUGIN_NAME).max(Integer::compare).orElse(0);
+                System.out.printf("%-" + length + "s    | %s%n", "Name", "ID");
+                System.out.printf("-----------------------------------\n");
                 for (Map<String, String> plugin : plugins) {
                     System.out.printf("%-" + length + "s    | %s%n", plugin.get("name"), plugin.get("id"));
                 }
