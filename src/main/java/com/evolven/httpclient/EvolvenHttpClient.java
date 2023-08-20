@@ -201,4 +201,45 @@ public class EvolvenHttpClient {
         return post(url, body);
     }
 
+    public IHttpRequestResult upgradeAgent(String apiKey, String hostId, String newVersion) {
+        URL url =  null;
+        try {
+            URIBuilder builder = new URIBuilder(baseUrl);
+            builder.setPath("/enlight.server/next/hosts");
+            builder.setParameter("action", "upgrade");
+            builder.setParameter("json", "true");
+            builder.setParameter("type", "updateVersion");
+            url = builder.build().toURL();
+            logger.fine("url: " + url);
+        } catch (URISyntaxException | MalformedURLException e) {
+            return new EvolvenHttpRequestResult("Failed to construct url. " + e.getMessage());
+        }
+        Map<String, String> body = new HashMap<String, String>() {{
+            put("EvolvenSessionKey", apiKey);
+            put("hostId", hostId);
+            put("version", newVersion);
+            put("returnStatus", "false");
+        }};
+        return post(url, body);
+    }
+
+    public IHttpRequestResult getAgentStatus(String apiKey, String hostId) {
+        URL url =  null;
+        try {
+            URIBuilder builder = new URIBuilder(baseUrl);
+            builder.setPath("/enlight.server/next/hosts");
+            builder.setParameter("action", "get");
+            builder.setParameter("json", "true");
+            url = builder.build().toURL();
+            logger.fine("url: " + url);
+        } catch (URISyntaxException | MalformedURLException e) {
+            return new EvolvenHttpRequestResult("Failed to construct url. " + e.getMessage());
+        }
+        Map<String, String> body = new HashMap<String, String>() {{
+            put("EvolvenSessionKey", apiKey);
+            put("hostId", hostId);
+            put("returnStatus", "true");
+        }};
+        return post(url, body);
+    }
 }

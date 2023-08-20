@@ -40,6 +40,11 @@ public class Main {
                         .addSubcommand("pull", new EvolvenCommandPolicyPull(new PullPolicyCommand(fileSystemManager)))
                         .addSubcommand("push", new EvolvenCommandPolicyPush(new PushPolicyCommand(fileSystemManager)))
                         .addSubcommand("test", new EvolvenCommandPolicyTest(new TestPolicyCommand(fileSystemManager)))
+
+                )
+                .addSubcommand("agent", new CommandLine(new EvolvenCommandAgent())
+                        .addSubcommand("upgrade", new EvolvenCommandAgentUpgrade(new UpgradeAgentCommand(fileSystemManager)))
+                        .addSubcommand("status", new EvolvenCommandAgentStatus(new GetAgentStatusCommand(fileSystemManager)))
                 );
 
         logger.fine("Executing command...");
