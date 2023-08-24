@@ -116,7 +116,7 @@ public class LoginCommand extends Command {
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
         IHttpRequestResult result = login(evolvenHttpClient, cachedValue, config);
         cacheApiKey(result, config);
-        System.out.printf("Login successful! ");
+        System.out.printf("Login successful!");
     }
 
 

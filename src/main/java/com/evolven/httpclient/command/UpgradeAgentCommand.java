@@ -92,7 +92,7 @@ public class UpgradeAgentCommand extends Command {
                 errorMsg += "\nReason phrase: " + reasonPhrase;
             }
             logger.log(Level.SEVERE, errorMsg);
-            throw new CommandExceptionNotLoggedIn();
+            throw new CommandException(errorMsg);
         }
     }
 

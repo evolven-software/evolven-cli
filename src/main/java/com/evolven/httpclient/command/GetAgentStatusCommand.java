@@ -55,11 +55,11 @@ public class GetAgentStatusCommand extends Command {
             throw new CommandException("Failed to construct base URL. " + e.getMessage());
         }
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
-        upgradeAgent(evolvenHttpClient, config);
+        getAgentStatus(evolvenHttpClient, config);
     }
 
 
-    private void upgradeAgent(EvolvenHttpClient evolvenHttpClient, EvolvenCliConfig config) throws CommandException {
+    private void getAgentStatus(EvolvenHttpClient evolvenHttpClient, EvolvenCliConfig config) throws CommandException {
         String apiKey = null;
         try {
             apiKey = config.getApiKey();
@@ -88,7 +88,7 @@ public class GetAgentStatusCommand extends Command {
                 errorMsg += "\nReason phrase: " + reasonPhrase;
             }
             logger.log(Level.SEVERE, errorMsg);
-            throw new CommandExceptionNotLoggedIn();
+            throw new CommandException(errorMsg);
         }
         Iterator<AgentStatus> agentStatusResponse = new AgentStatusResponse(result.getContent()).iterator();
         if (agentStatusResponse.hasNext()) {
