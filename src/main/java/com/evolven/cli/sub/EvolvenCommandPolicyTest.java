@@ -1,11 +1,14 @@
-package com.evolven.cli;
+package com.evolven.cli.sub;
 
+import com.evolven.cli.main.EvolvenCommandEnv;
 import com.evolven.command.Command;
-import com.evolven.command.CommandException;
+import com.evolven.command.InvalidParameterException;
 import picocli.CommandLine;
 
-@CommandLine.Command(name = "test", header = "Upload an Evolven policy")
-public class EvolvenCommandPolicyTest extends EvolvenCommand {
+@CommandLine.Command(name = EvolvenCommandPolicyTest.COMMAND_NAME, header = "Upload an Evolven policy")
+public class EvolvenCommandPolicyTest extends EvolvenCommandEnv {
+
+    public static final String COMMAND_NAME = "test";
 
     @CommandLine.Option(names = {"-f", "--policy-file"}, required = true, description = "Path to a policy file.")
     protected String filename;
@@ -18,25 +21,14 @@ public class EvolvenCommandPolicyTest extends EvolvenCommand {
             "In such a case the \"--cretirion\" parameter will define the sub-group of the scope defined in the policy")
     protected Boolean scope;
 
-    @CommandLine.Option(names = {"-h", "--help"}, description = "Print help.")
-    protected boolean help;
-
-    @CommandLine.Spec
-    protected CommandLine.Model.CommandSpec spec;
-
     public EvolvenCommandPolicyTest(Command command) {
         super(command);
     }
 
     @Override
-    public void execute() throws CommandException {
-        if (help) {
-            spec.commandLine().usage(System.out);
-            return;
-        }
-            addOption(filename, this);
-            addOption(query, this);
-            addFlag(scope, this);
-            invokeHandler();
+    protected void addParameters() throws InvalidParameterException {
+        addOption(filename, this);
+        addOption(query, this);
+        addFlag(scope, this);
     }
 }

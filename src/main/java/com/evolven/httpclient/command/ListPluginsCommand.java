@@ -1,6 +1,6 @@
 package com.evolven.httpclient.command;
 
-import com.evolven.command.Command;
+import com.evolven.command.CommandEnv;
 import com.evolven.command.CommandException;
 import com.evolven.command.CommandExceptionNotLoggedIn;
 import com.evolven.common.StringUtils;
@@ -21,29 +21,25 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ListPluginsCommand extends Command {
+public class ListPluginsCommand extends CommandEnv {
+
     private static final int MAX_LENGTH_PLUGIN_NAME = 60;
 
-    Logger logger = LoggerManager.getLogger(this);
+    private final Logger logger = LoggerManager.getLogger(this);
 
-    FileSystemManager fileSystemManager;
     public ListPluginsCommand(FileSystemManager fileSystemManager) {
-        this.fileSystemManager = fileSystemManager;
+        super(fileSystemManager);
     }
 
     @Override
     public void execute() throws CommandException {
-        EvolvenCliConfig config = fileSystemManager.getConfig();
-        try {
-            config.setEnvironment();
-        } catch (ConfigException e) {
-            throw new CommandException("Failed to load active environment. " + e.getMessage());
-        }
+        EvolvenCliConfig config = getConfig();
+        setEnvironmentFromConfig(config);
         String baseUrl = null;
         try {
             baseUrl = CachedURLBuilder.createBaseUrl(config);
         } catch (MalformedURLException | ConfigException e) {
-            throw new CommandException("Failed to construct base URL. " + e.getMessage());
+            throw new CommandException("Failed to construct base URL.", e);
         }
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
         listPlugins(evolvenHttpClient, config);

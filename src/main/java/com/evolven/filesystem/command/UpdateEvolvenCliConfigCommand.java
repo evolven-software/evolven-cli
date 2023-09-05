@@ -5,15 +5,13 @@ import com.evolven.command.CommandException;
 import com.evolven.filesystem.FileSystemManager;
 
 public class UpdateEvolvenCliConfigCommand extends Command {
-    private FileSystemManager fileSystemManager;
+
     public UpdateEvolvenCliConfigCommand(FileSystemManager fileSystemManager) {
-        this.fileSystemManager = fileSystemManager;
+        super(fileSystemManager);
     }
 
     @Override
-    public void execute() throws CommandException {
-
-    }
+    public void execute() throws CommandException {}
 
     @Override
     public String getName() {

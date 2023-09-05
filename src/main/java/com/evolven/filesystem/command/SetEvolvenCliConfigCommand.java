@@ -1,38 +1,37 @@
 package com.evolven.filesystem.command;
 
-import com.evolven.command.Command;
+import com.evolven.command.CommandEnv;
 import com.evolven.command.CommandException;
 import com.evolven.common.StringUtils;
 import com.evolven.config.ConfigException;
 import com.evolven.filesystem.EvolvenCliConfig;
 import com.evolven.filesystem.FileSystemManager;
 import com.evolven.logging.LoggerManager;
+
 import java.util.logging.Logger;
 
-public class SetEvolvenCliConfigCommand extends Command {
+public class SetEvolvenCliConfigCommand extends CommandEnv {
 
-    public static final String OPTION_KEY = "key";
-    public static final String OPTION_ENV = "env";
-    public static final String OPTION_VALUE = "value";
-    public static final String OPTION_ACTIVE_ENV = "activeEnv";
-    FileSystemManager fileSystemManager;
-    Logger logger = LoggerManager.getLogger(this);
+    private final Logger logger = LoggerManager.getLogger(this);
 
     public SetEvolvenCliConfigCommand(FileSystemManager fileSystemManager) {
-        this.fileSystemManager = fileSystemManager;
-        registerOptions(new String[] {
-                OPTION_ENV,
-                OPTION_KEY,
-                OPTION_VALUE,
+        super(fileSystemManager);
+
+        registerOptions(
                 OPTION_ACTIVE_ENV,
-        });
+                OPTION_KEY,
+                OPTION_VALUE
+        );
     }
 
     @Override
     public void execute() throws CommandException {
-        EvolvenCliConfig config = fileSystemManager.getConfig();
+        EvolvenCliConfig config = getConfig();
         String activeEnv = options.get(OPTION_ACTIVE_ENV);
         if (!StringUtils.isNullOrBlank(activeEnv)) {
+            if (isIllegalEnvironmentName(activeEnv)) {
+                throw new CommandException("Illegal environment name: \"" + activeEnv + "\"");
+            }
             try {
                 config.setActiveEnvironment(activeEnv);
             } catch (ConfigException e) {
@@ -61,7 +60,6 @@ public class SetEvolvenCliConfigCommand extends Command {
             } catch (ConfigException e) {
                 throw new CommandException("Failed to remove key: " + key + ".", e);
             }
-
         }
     }
 

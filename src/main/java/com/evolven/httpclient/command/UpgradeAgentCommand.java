@@ -1,6 +1,6 @@
 package com.evolven.httpclient.command;
 
-import com.evolven.command.Command;
+import com.evolven.command.CommandEnv;
 import com.evolven.command.CommandException;
 import com.evolven.command.CommandExceptionNotLoggedIn;
 import com.evolven.common.StringUtils;
@@ -16,13 +16,9 @@ import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class UpgradeAgentCommand extends Command {
+public class UpgradeAgentCommand extends CommandEnv {
 
-    public static final String OPTION_AGENT_HOST_ID = "host";
-    public static final String OPTION_AGENT_VERSION = "version";
-    FileSystemManager fileSystemManager;
-
-    Logger logger = LoggerManager.getLogger(this);
+    private final Logger logger = LoggerManager.getLogger(this);
 
     public static final String[] requiredFiles = {
             "plugin.yml"
@@ -31,26 +27,23 @@ public class UpgradeAgentCommand extends Command {
     public static final String[] optionalFiles = {};
 
     public UpgradeAgentCommand(FileSystemManager fileSystemManager) {
-        this.fileSystemManager = fileSystemManager;
-        registerOptions(new String[] {
+        super(fileSystemManager);
+
+        registerOptions(
                 OPTION_AGENT_HOST_ID,
-                OPTION_AGENT_VERSION
-        });
+		        OPTION_AGENT_VERSION
+        );
     }
 
     @Override
     public void execute() throws CommandException {
-        EvolvenCliConfig config = fileSystemManager.getConfig();
-        try {
-            config.setEnvironment();
-        } catch (ConfigException e) {
-            throw new CommandException("Failed to load active environment. " + e.getMessage());
-        }
+        EvolvenCliConfig config = getConfig();
+        setEnvironmentFromConfig(config);
         String baseUrl = null;
         try {
             baseUrl = CachedURLBuilder.createBaseUrl(config);
         } catch (MalformedURLException | ConfigException e) {
-            throw new CommandException("Failed to construct base URL. " + e.getMessage());
+            throw new CommandException("Failed to construct base URL.", e);
         }
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
         upgradeAgent(evolvenHttpClient, config);

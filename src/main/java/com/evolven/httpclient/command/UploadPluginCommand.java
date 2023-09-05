@@ -1,10 +1,9 @@
 package com.evolven.httpclient.command;
 
-import com.evolven.command.Command;
+import com.evolven.command.CommandEnv;
 import com.evolven.command.CommandException;
 import com.evolven.command.CommandExceptionNotLoggedIn;
 import com.evolven.common.StringUtils;
-import com.evolven.common.YAMLUtils;
 import com.evolven.config.ConfigException;
 import com.evolven.filesystem.EvolvenCliConfig;
 import com.evolven.filesystem.FileSystemManager;
@@ -26,12 +25,9 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class UploadPluginCommand extends Command {
+public class UploadPluginCommand extends CommandEnv {
 
-    public static final String OPTION_PLUGIN_PATH = "path";
-    FileSystemManager fileSystemManager;
-
-    Logger logger = LoggerManager.getLogger(this);
+    private final Logger logger = LoggerManager.getLogger(this);
 
     public static final String[] requiredFiles = {
             "plugin.yml"
@@ -40,27 +36,24 @@ public class UploadPluginCommand extends Command {
     public static final String[] optionalFiles = {};
 
     public UploadPluginCommand(FileSystemManager fileSystemManager) {
-        this.fileSystemManager = fileSystemManager;
-        registerOptions(new String[] {
-                OPTION_PLUGIN_PATH,
-        });
+        super(fileSystemManager);
+
+        registerOptions(
+                OPTION_PLUGIN_PATH
+        );
     }
 
     @Override
     public void execute() throws CommandException {
+        EvolvenCliConfig config = getConfig();
+        setEnvironmentFromConfig(config);
         String pluginPath = options.get(OPTION_PLUGIN_PATH);
         testPluginDefinition(pluginPath);
-        EvolvenCliConfig config = fileSystemManager.getConfig();
-        try {
-            config.setEnvironment();
-        } catch (ConfigException e) {
-            throw new CommandException("Failed to load active environment. " + e.getMessage());
-        }
         String baseUrl = null;
         try {
             baseUrl = CachedURLBuilder.createBaseUrl(config);
         } catch (MalformedURLException | ConfigException e) {
-            throw new CommandException("Failed to construct base URL. " + e.getMessage());
+            throw new CommandException("Failed to construct base URL.", e);
         }
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
         byte[] archive = null;

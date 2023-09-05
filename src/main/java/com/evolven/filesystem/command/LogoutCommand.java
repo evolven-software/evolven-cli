@@ -1,31 +1,30 @@
 package com.evolven.filesystem.command;
 
-import com.evolven.command.Command;
+import com.evolven.command.CommandEnv;
 import com.evolven.command.CommandException;
 import com.evolven.common.StringUtils;
 import com.evolven.config.ConfigException;
 import com.evolven.filesystem.EvolvenCliConfig;
 import com.evolven.filesystem.FileSystemManager;
 
-public class LogoutCommand extends Command {
-
-    public static final String OPTION_ENV = "env";
-    FileSystemManager fileSystemManager;
+public class LogoutCommand extends CommandEnv {
 
     public LogoutCommand(FileSystemManager fileSystemManager) {
-        this.fileSystemManager  = fileSystemManager;
-        registerOption(OPTION_ENV);
+        super(fileSystemManager);
     }
 
     @Override
     public void execute() throws CommandException {
+        EvolvenCliConfig config = getConfig();
         String env = options.get(OPTION_ENV);
-        EvolvenCliConfig config = fileSystemManager.getConfig();
-        try {
-            if (StringUtils.isNullOrBlank(env)
-                    && StringUtils.isNullOrBlank(env = config.getActiveEnvironment())) return;
-            config.deleteApiKey(env);
-        } catch (ConfigException e) {}
+        if (StringUtils.isNullOrBlank(env)) {
+            throw new CommandException("No environment provided.");
+        } else {
+            config.setEnvironment(env);
+            try {
+                config.deleteApiKey(env);
+            } catch (ConfigException e) {}
+        }
     }
 
     @Override

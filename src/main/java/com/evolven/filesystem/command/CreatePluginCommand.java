@@ -1,4 +1,4 @@
-package com.evolven.httpclient.command;
+package com.evolven.filesystem.command;
 
 import com.evolven.command.Command;
 import com.evolven.command.CommandException;
@@ -12,27 +12,20 @@ import java.util.Arrays;
 import java.util.List;
 
 public class CreatePluginCommand extends Command {
-    public static final String OPTION_NAME = "name";
-    public static final String OPTION_VERSION = "version";
-    public static final String OPTION_COLLECTION = "collection";
-    public static final String OPTION_POLICY = "policy";
-    public static final String OPTION_DASHBOARD = "dashboard";
-    public static final String OPTION_OUTPUT = "output";
     public static final String DEFAULT_VERSION = "2.1.1";
 //    public static final String FLAG_ALLOW_NON_EMPTY_FOLDER = "allowNonEmptyFolder";
 
-    FileSystemManager fileSystemManager;
     public CreatePluginCommand(FileSystemManager fileSystemManager) {
-        this.fileSystemManager = fileSystemManager;
+        super(fileSystemManager);
     
-        registerOptions(new String[] {
+        registerOptions(
                 OPTION_NAME,
                 OPTION_VERSION,
-                OPTION_COLLECTION,
-                OPTION_POLICY,
-                OPTION_DASHBOARD,
-                OPTION_OUTPUT
-        });
+		        OPTION_COLLECTION,
+		        OPTION_POLICY,
+		        OPTION_DASHBOARD,
+		        OPTION_OUTPUT
+        );
     
 //        registerFlag(FLAG_ALLOW_NON_EMPTY_FOLDER);
     }

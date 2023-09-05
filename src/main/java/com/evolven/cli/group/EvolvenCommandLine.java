@@ -1,5 +1,6 @@
-package com.evolven.cli;
+package com.evolven.cli.group;
 
+import com.evolven.cli.main.EvolvenCommandsGroup;
 import picocli.CommandLine.Command;
 
 @Command(name = "evolven", mixinStandardHelpOptions = true, version = "Evolven CLI 1.0",

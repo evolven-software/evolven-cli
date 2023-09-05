@@ -8,12 +8,14 @@ import java.io.File;
 import java.io.IOException;
 
 public class CreateEvolvenCliConfigCommand extends Command {
-    private FileSystemManager fileSystemManager;
     public static final String FLAG_FORCE = "force";
 
     public CreateEvolvenCliConfigCommand(FileSystemManager fileSystemManager) {
-        this.fileSystemManager = fileSystemManager;
-        registerFlags(new String[] {FLAG_FORCE});
+        super(fileSystemManager);
+
+        registerFlags(
+                FLAG_FORCE
+        );
     }
 
     @Override
@@ -25,7 +27,7 @@ public class CreateEvolvenCliConfigCommand extends Command {
         try {
             this.fileSystemManager.dumpInitialPolicyConfig();
         } catch (IOException e) {
-            throw new CommandException("Failed to create initial policy config. " + e.getMessage());
+            throw new CommandException("Failed to create initial policy config.", e);
         }
     }
 

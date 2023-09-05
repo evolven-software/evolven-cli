@@ -1,6 +1,6 @@
 package com.evolven.httpclient.command;
 
-import com.evolven.command.Command;
+import com.evolven.command.CommandEnv;
 import com.evolven.command.CommandException;
 import com.evolven.command.CommandExceptionNotLoggedIn;
 import com.evolven.common.StringUtils;
@@ -24,33 +24,27 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class PushPolicyCommand extends Command {
+public class PushPolicyCommand extends CommandEnv {
 
-    public static final String OPTION_POLICY_FILENAME = "filename";
-    FileSystemManager fileSystemManager;
-
-    Logger logger = LoggerManager.getLogger(this);
+    private final Logger logger = LoggerManager.getLogger(this);
 
     public PushPolicyCommand(FileSystemManager fileSystemManager) {
-        this.fileSystemManager = fileSystemManager;
-        registerOptions(new String[] {
-                OPTION_POLICY_FILENAME,
-        });
+        super(fileSystemManager);
+
+        registerOptions(
+                OPTION_POLICY_FILENAME
+        );
     }
 
     @Override
     public void execute() throws CommandException {
-        EvolvenCliConfig config = fileSystemManager.getConfig();
-        try {
-            config.setEnvironment();
-        } catch (ConfigException e) {
-            throw new CommandException("Failed to load active environment. " + e.getMessage());
-        }
+        EvolvenCliConfig config = getConfig();
+        setEnvironmentFromConfig(config);
         String baseUrl = null;
         try {
             baseUrl = CachedURLBuilder.createBaseUrl(config);
         } catch (MalformedURLException | ConfigException e) {
-            throw new CommandException("Failed to construct base URL. " + e.getMessage());
+            throw new CommandException("Failed to construct base URL.", e);
         }
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
         Map<String, String> policies = null;
@@ -61,6 +55,7 @@ public class PushPolicyCommand extends Command {
         }
         pushPolicy(evolvenHttpClient, config,  policies);
     }
+
     private void pushPolicy(EvolvenHttpClient evolvenHttpClient, EvolvenCliConfig config, Map<String, String> policies) throws CommandException {
         String apiKey = null;
         try {
@@ -90,6 +85,7 @@ public class PushPolicyCommand extends Command {
 
         PolicyConfig policyConfig = PolicyConfigFactory.createConfig(fileSystemManager.getPolicyConfigFile());
         JsonNode rule = YAMLUtils.load(policyYamlFile);
+        if (rule == null) throw new IOException("Couldn't load policy config file.");
         return policyConfig.getEditablePolicyFields()
                 .stream()
                 .filter(f -> rule.get(f) != null)

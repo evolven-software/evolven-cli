@@ -1,6 +1,6 @@
 package com.evolven.cli.exception;
 
-import com.evolven.cli.EvolvenCommandLogin;
+import com.evolven.cli.single.EvolvenCommandLogin;
 
 public class EvolvenCommandExceptionLogin extends EvolvenCommandException {
     public static final String MSG = "You are not authenticated with any Evolven server. " +

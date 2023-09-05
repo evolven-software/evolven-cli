@@ -1,6 +1,6 @@
 package com.evolven.httpclient.command;
 
-import com.evolven.command.Command;
+import com.evolven.command.CommandEnv;
 import com.evolven.command.CommandException;
 import com.evolven.command.CommandExceptionNotLoggedIn;
 import com.evolven.common.StringUtils;
@@ -17,7 +17,6 @@ import com.evolven.policy.Policy;
 import com.evolven.policy.PolicyConfigFactory;
 import com.evolven.policy.PolicyWriter;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,32 +27,43 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class PullPolicyCommand extends Command {
-    FileSystemManager fileSystemManager;
-    public static final String OPTION_OUTPUT = "output";
-    public static final String OPTION_SINGLE_FILENAME = "filename";
-    public static final String OPTION_FORMAT = "format";
-    public static final String OPTION_POLICY_NAME = "name";
+public class PullPolicyCommand extends CommandEnv {
+
     public static final String FLAG_FORCE = "force";
     public static final String FLAG_COMMENT = "comment";
     public static final String FLAG_ALL = "all";
 
-    Logger logger = LoggerManager.getLogger(this);
+    private final Logger logger = LoggerManager.getLogger(this);
 
     public PullPolicyCommand(FileSystemManager fileSystemManager) {
-        registerOptions(new String[] {
-                OPTION_OUTPUT,
-                OPTION_SINGLE_FILENAME,
-                OPTION_FORMAT,
-                OPTION_POLICY_NAME,
-        });
-        registerFlags(new String[] {
-                FLAG_FORCE,
-                FLAG_COMMENT,
-                FLAG_ALL
-        });
+        super(fileSystemManager);
 
-        this.fileSystemManager = fileSystemManager;
+        registerOptions(
+                OPTION_OUTPUT,
+		        OPTION_FILENAME,
+		        OPTION_FORMAT,
+		        OPTION_POLICY_NAME
+        );
+
+        registerFlags(
+                FLAG_FORCE,
+		        FLAG_COMMENT,
+		        FLAG_ALL
+        );
+    }
+    
+    @Override
+    public void execute() throws CommandException {
+        EvolvenCliConfig config = getConfig();
+        setEnvironmentFromConfig(config);
+        String baseUrl = null;
+        try {
+            baseUrl = createBaseUrl(config);
+        } catch (ConfigException e) {
+            throw new CommandException("Failed to construct server base url.", e);
+        }
+        EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
+        getPolicies(evolvenHttpClient, config);
     }
 
     private String createBaseUrl(EvolvenCliConfig config) throws CommandException, ConfigException {
@@ -61,26 +71,8 @@ public class PullPolicyCommand extends Command {
         try {
             return builder.build();
         } catch (MalformedURLException e) {
-            throw new CommandException("Failed to construct base URL. " + e.getMessage());
+            throw new CommandException("Failed to construct base URL.", e);
         }
-    }
-
-    @Override
-    public void execute() throws CommandException {
-        EvolvenCliConfig config = fileSystemManager.getConfig();
-        try {
-            config.setEnvironment();
-        } catch (ConfigException e) {
-            throw new CommandException("Failed to load active environment. " + e.getMessage());
-        }
-        String baseUrl = null;
-        try {
-            baseUrl = createBaseUrl(config);
-        } catch (ConfigException e) {
-            throw new CommandException("Failed to construct server base url. " + e.getMessage());
-        }
-        EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
-        getPolicies(evolvenHttpClient, config);
     }
 
     private void getPolicies(EvolvenHttpClient evolvenHttpClient, EvolvenCliConfig config) throws CommandException {
@@ -113,9 +105,9 @@ public class PullPolicyCommand extends Command {
         try {
             writePolicy(result.getContent());
         } catch (JsonProcessingException e) {
-            throw new CommandException("Failed to parse policy. " + e.getMessage());
+            throw new CommandException("Failed to parse policy.", e);
         } catch (IOException e) {
-            throw new CommandException("Failed to save policy to the local storage. " + e.getMessage());
+            throw new CommandException("Failed to save policy to the local storage.", e);
         }
     }
 
@@ -144,8 +136,8 @@ public class PullPolicyCommand extends Command {
         }
     }
 
-    class IndexedCache {
-        private Map<String, Integer> cache = new HashMap<>();
+    private static class IndexedCache {
+        private final Map<String, Integer> cache = new HashMap<>();
 
         public String get(String s) {
             Integer ix = cache.get(s);

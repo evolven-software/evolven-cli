@@ -1,6 +1,6 @@
 package com.evolven.httpclient.command;
 
-import com.evolven.command.Command;
+import com.evolven.command.CommandEnv;
 import com.evolven.command.CommandException;
 import com.evolven.command.CommandExceptionNotLoggedIn;
 import com.evolven.common.StringUtils;
@@ -16,16 +16,12 @@ import com.evolven.logging.LoggerManager;
 
 import java.net.MalformedURLException;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class GetAgentStatusCommand extends Command {
+public class GetAgentStatusCommand extends CommandEnv {
 
-    public static final String OPTION_AGENT_HOST_ID = "host";
-    FileSystemManager fileSystemManager;
-
-    Logger logger = LoggerManager.getLogger(this);
+    private final Logger logger = LoggerManager.getLogger(this);
 
     public static final String[] requiredFiles = {
             "plugin.yml"
@@ -34,25 +30,22 @@ public class GetAgentStatusCommand extends Command {
     public static final String[] optionalFiles = {};
 
     public GetAgentStatusCommand(FileSystemManager fileSystemManager) {
-        this.fileSystemManager = fileSystemManager;
-        registerOptions(new String[] {
-                OPTION_AGENT_HOST_ID
-        });
+        super(fileSystemManager);
+
+        registerOptions(
+                OPTION_AGENT_HOST
+        );
     }
 
     @Override
     public void execute() throws CommandException {
-        EvolvenCliConfig config = fileSystemManager.getConfig();
-        try {
-            config.setEnvironment();
-        } catch (ConfigException e) {
-            throw new CommandException("Failed to load active environment. " + e.getMessage());
-        }
+        EvolvenCliConfig config = getConfig();
+        setEnvironmentFromConfig(config);
         String baseUrl = null;
         try {
             baseUrl = CachedURLBuilder.createBaseUrl(config);
         } catch (MalformedURLException | ConfigException e) {
-            throw new CommandException("Failed to construct base URL. " + e.getMessage());
+            throw new CommandException("Failed to construct base URL.", e);
         }
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
         getAgentStatus(evolvenHttpClient, config);
@@ -72,7 +65,7 @@ public class GetAgentStatusCommand extends Command {
             logger.log(Level.SEVERE, "Api key not found. Login is required.");
             throw new CommandExceptionNotLoggedIn();
         }
-        String hostId = options.get(OPTION_AGENT_HOST_ID);
+        String hostId = options.get(OPTION_AGENT_HOST);
         if (StringUtils.isNullOrBlank(hostId)) {
             String msg = "Host ID is required";
             logger.log(Level.SEVERE, msg);

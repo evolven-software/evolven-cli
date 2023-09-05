@@ -1,6 +1,6 @@
 package com.evolven.httpclient.command;
 
-import com.evolven.command.Command;
+import com.evolven.command.CommandEnv;
 import com.evolven.command.CommandException;
 import com.evolven.command.CommandExceptionNotLoggedIn;
 import com.evolven.common.StringUtils;
@@ -9,9 +9,9 @@ import com.evolven.filesystem.EvolvenCliConfig;
 import com.evolven.filesystem.FileSystemManager;
 import com.evolven.httpclient.CachedURLBuilder;
 import com.evolven.httpclient.EvolvenHttpClient;
-import com.evolven.httpclient.response.EnvironmentsResponse;
 import com.evolven.httpclient.http.IHttpRequestResult;
 import com.evolven.httpclient.model.Environment;
+import com.evolven.httpclient.response.EnvironmentsResponse;
 import com.evolven.logging.LoggerManager;
 
 import java.net.MalformedURLException;
@@ -19,30 +19,26 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class SearchCommand extends Command {
-    private final static String OPTION_QUERY = "query";
-    FileSystemManager fileSystemManager;
-    Logger logger = LoggerManager.getLogger(this);
+public class SearchCommand extends CommandEnv {
+    private final Logger logger = LoggerManager.getLogger(this);
+    
     public SearchCommand(FileSystemManager fileSystemManager) {
-        this.fileSystemManager = fileSystemManager;
-        registerOptions(new String[] {
-                OPTION_QUERY,
-        });
+        super(fileSystemManager);
+
+        registerOptions(
+                OPTION_QUERY
+        );
     }
 
     @Override
     public void execute() throws CommandException {
-        EvolvenCliConfig config = fileSystemManager.getConfig();
-        try {
-            config.setEnvironment();
-        } catch (ConfigException e) {
-            throw new CommandException("Failed to load active environment. " + e.getMessage());
-        }
+        EvolvenCliConfig config = getConfig();
+        setEnvironmentFromConfig(config);
         String baseUrl = null;
         try {
             baseUrl = CachedURLBuilder.createBaseUrl(config);
         } catch (MalformedURLException | ConfigException e) {
-            throw new CommandException("Failed to construct base URL. " + e.getMessage());
+            throw new CommandException("Failed to construct base URL.", e);
         }
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
         Iterator<Environment> iterator = search(evolvenHttpClient, config, options.get(OPTION_QUERY));

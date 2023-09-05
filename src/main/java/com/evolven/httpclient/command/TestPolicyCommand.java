@@ -1,9 +1,6 @@
 package com.evolven.httpclient.command;
 
-import com.evolven.command.Command;
-import com.evolven.command.CommandException;
-import com.evolven.command.CommandExceptionNotLoggedIn;
-import com.evolven.command.CommandFailure;
+import com.evolven.command.*;
 import com.evolven.common.Spinner;
 import com.evolven.common.StringUtils;
 import com.evolven.common.YAMLUtils;
@@ -33,41 +30,39 @@ import java.util.Arrays;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class TestPolicyCommand extends Command {
+public class TestPolicyCommand extends CommandEnv {
 
-    public static final String OPTION_POLICY_FILENAME = "filename";
-    public static final String OPTION_QUERY = "query";
     public static final String FLAG_USE_POLICY_SCOPE = "scope";
-    FileSystemManager fileSystemManager;
-    Logger logger = LoggerManager.getLogger(this);
+
+    private final Logger logger = LoggerManager.getLogger(this);
 
     public TestPolicyCommand(FileSystemManager fileSystemManager) {
-        this.fileSystemManager = fileSystemManager;
-        registerOptions(new String[] {
-                OPTION_POLICY_FILENAME,
-                OPTION_QUERY,
-        });
-        registerFlag(FLAG_USE_POLICY_SCOPE);
+        super(fileSystemManager);
+
+        registerOptions(
+                OPTION_FILENAME,
+                OPTION_QUERY
+        );
+
+        registerFlags(
+                FLAG_USE_POLICY_SCOPE
+        );
     }
 
     @Override
     public void execute() throws CommandException {
-        EvolvenCliConfig config = fileSystemManager.getConfig();
-        try {
-            config.setEnvironment();
-        } catch (ConfigException e) {
-            throw new CommandException("Failed to load active environment. " + e.getMessage());
-        }
+        EvolvenCliConfig config = getConfig();
+        setEnvironmentFromConfig(config);
         String baseUrl = null;
         try {
             baseUrl = CachedURLBuilder.createBaseUrl(config);
         } catch (MalformedURLException | ConfigException e) {
-            throw new CommandException("Failed to construct base URL. " + e.getMessage());
+            throw new CommandException("Failed to construct base URL.", e);
         }
         EvolvenHttpClient evolvenHttpClient = new EvolvenHttpClient(baseUrl);
         Map<String, String> policies = null;
         try {
-            policies = fromYamlFile(options.get(OPTION_POLICY_FILENAME));
+            policies = fromYamlFile(options.get(OPTION_FILENAME));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -121,6 +116,7 @@ public class TestPolicyCommand extends Command {
         File policyYamlFile = new File(filepath);
         PolicyConfig policyConfig = PolicyConfigFactory.createConfig(fileSystemManager.getPolicyConfigFile());
         JsonNode rule = YAMLUtils.load(policyYamlFile);
+        if (rule == null) throw new IOException("Couldn't load policy config file.");
         return policyConfig.getEditablePolicyFields()
                 .stream()
                 .filter(f -> rule.get(f) != null)
@@ -129,8 +125,8 @@ public class TestPolicyCommand extends Command {
 
 
     class ParametersProcessor {
-        private Map<String, String> policies;
-        private String query;
+        private final Map<String, String> policies;
+        private final String query;
         public ParametersProcessor(Map<String, String> policies, String query) {
             this.policies = policies;
             this.query = query == null ? "" : query;
@@ -157,9 +153,9 @@ public class TestPolicyCommand extends Command {
         }
     }
 
-    class PolicyTestResultAccumulator {
+    private static class PolicyTestResultAccumulator {
 
-        class PolicyTestResult {
+        private static class PolicyTestResult {
             String envName;
             String envId;
             String value;
@@ -193,14 +189,14 @@ public class TestPolicyCommand extends Command {
         }
 
         void print(PrintStream out) {
-            if (result.size() == 0) {
+            if (result.isEmpty()) {
                 out.println("Number of found environments: 0");
                 return;
             }
             out.println(separator);
             out.println(header);
             out.println(separator);
-            result.stream().forEach(r -> out.println(r.toLine(format)));
+            result.forEach(r -> out.println(r.toLine(format)));
             out.println(separator);
             out.println(String.format("Number of found environments: %d; %d passed; %d failed", result.size(), result.size() - numFailed, numFailed));
             if (numFailed == 0) out.println("SUCCESS");

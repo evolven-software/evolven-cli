@@ -1,38 +1,40 @@
 package com.evolven.filesystem.command;
 
-import com.evolven.command.Command;
+import com.evolven.command.CommandEnv;
 import com.evolven.command.CommandException;
-import com.evolven.command.InvalidParameterException;
 import com.evolven.common.StringUtils;
 import com.evolven.config.ConfigException;
 import com.evolven.filesystem.EvolvenCliConfig;
 import com.evolven.filesystem.FileSystemManager;
 
-public class GetEvolvenCliConfigCommand extends Command {
-    public static final String OPTION_KEY = "key";
-    public static final String OPTION_ENV = "env";
-    public static final String FLAG_ACTIVE_ENV = "activeEnv";
-    FileSystemManager fileSystemManager;
+public class GetEvolvenCliConfigCommand extends CommandEnv {
+
     public GetEvolvenCliConfigCommand(FileSystemManager fileSystemManager) {
-        this.fileSystemManager = fileSystemManager;
-        registerOptions(new String[] {
-                OPTION_ENV,
-                OPTION_KEY,
-        });
-        registerFlag(FLAG_ACTIVE_ENV);
+        super(fileSystemManager);
+
+        registerOptions(
+                OPTION_KEY
+        );
+
+        registerFlags(
+                OPTION_ACTIVE_ENV
+        );
     }
 
     @Override
     public void execute() throws CommandException {
-        EvolvenCliConfig config = fileSystemManager.getConfig();
-        boolean activeEnv = flags.get(FLAG_ACTIVE_ENV);
+        EvolvenCliConfig config = getConfig();
+        boolean activeEnv = flags.get(OPTION_ACTIVE_ENV);
         if (activeEnv) {
-            String active = null;
             try {
-                active = config.getActiveEnvironment();
-            } catch (ConfigException e) {}
-            if (!StringUtils.isNullOrBlank(active)) {
-                System.out.println("Active environment: " + active);
+                String active = config.getActiveEnvironment();
+                if (!StringUtils.isNullOrBlank(active)) {
+                    System.out.println("Active environment: \"" + active + "\"");
+                } else {
+                    System.out.println("No active environment");
+                }
+            } catch (ConfigException e) {
+                throw new CommandException("Failed to load active environment.", e);
             }
         }
 
@@ -49,14 +51,10 @@ public class GetEvolvenCliConfigCommand extends Command {
                 value = config.get(env, key);
             }
         } catch (ConfigException e) {
-            throw new RuntimeException(e);
+            throw new CommandException("Failed to get config value.", e);
         }
-        if (!StringUtils.isNullOrBlank(value)) {
-            System.out.println((StringUtils.isNullOrBlank(env) ? "" : env + ".") + key + ": " + value);
-        }
+        System.out.println((StringUtils.isNullOrBlank(env) ? "" : env + ".") + key + ": \"" + (StringUtils.isNullOrBlank(value) ? "" : value) + "\"");
     }
-
-
 
     @Override
     public String getName() {

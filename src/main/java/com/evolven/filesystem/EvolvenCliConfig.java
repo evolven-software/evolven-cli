@@ -16,7 +16,7 @@ public class EvolvenCliConfig {
     private static final String BASE_URL_KEY = "base-url";
 
     private static final String API_KEY_KEY = "api-key";
-    public static final String ENVIRONMENT_KEY = "active-env";
+    public static final String ACTIVE_ENVIRONMENT_KEY = "active-env";
     File yamlFile;
 
     YAMLFileConfig config;
@@ -26,32 +26,47 @@ public class EvolvenCliConfig {
         this.yamlFile = yamlFile;
     }
 
-
     public String getActiveEnvironment() throws ConfigException {
-        return getInternal(null, ENVIRONMENT_KEY);
+        return getInternal(null, ACTIVE_ENVIRONMENT_KEY);
     }
 
     public void setActiveEnvironment(String activeEnvironment) throws ConfigException {
-        setInternal(null, ENVIRONMENT_KEY, activeEnvironment);
+        setInternal(null, ACTIVE_ENVIRONMENT_KEY, activeEnvironment);
     }
 
-    public void setCurrentAndCachedEnvironment(String activeEnvironment) throws ConfigException {
-        setInternal(null, ENVIRONMENT_KEY, activeEnvironment);
+    public void setActiveAndCachedEnvironment(String activeEnvironment) throws ConfigException {
+        setActiveEnvironment(activeEnvironment);
         setEnvironment(activeEnvironment);
     }
-
+    
     public void setEnvironment(String environment) {
         if (!StringUtils.isNullOrBlank(environment)) {
             this.environment = environment;
         }
     }
-
+    
+    public void setEnvironmentIfExists(String environment) throws ConfigException {
+        if (!StringUtils.isNullOrBlank(environment) && getApiKey(environment) != null) {
+            this.environment = environment;
+        }
+    }
+    
     public void setEnvironment() throws ConfigException {
         String activeEnvironment = getActiveEnvironment();
         if (activeEnvironment == null) {
             throw new ConfigException("Active Environment is not set (need to login?).");
         }
         setEnvironment(activeEnvironment);
+    }
+    
+    public void setEnvironmentIfExistsOrActive(String environment) throws ConfigException {
+        if (StringUtils.isNullOrBlank(environment)) setEnvironment();
+        else if (getApiKey(environment) == null) throw new ConfigException("Environment \"" + environment + "\" is not set.");
+        else setEnvironment(environment);
+    }
+    
+    public String getEnvironment() {
+        return this.environment;
     }
 
     public void unsetEnvironment() {

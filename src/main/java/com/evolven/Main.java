@@ -1,12 +1,11 @@
 package com.evolven;
 
-import com.evolven.cli.*;
 import com.evolven.cli.exception.ExecutionExceptionHandler;
+import com.evolven.cli.group.*;
+import com.evolven.cli.single.*;
+import com.evolven.cli.sub.*;
 import com.evolven.filesystem.FileSystemManager;
-import com.evolven.filesystem.command.CreateEvolvenCliConfigCommand;
-import com.evolven.filesystem.command.GetEvolvenCliConfigCommand;
-import com.evolven.filesystem.command.LogoutCommand;
-import com.evolven.filesystem.command.SetEvolvenCliConfigCommand;
+import com.evolven.filesystem.command.*;
 import com.evolven.httpclient.command.*;
 import com.evolven.logging.LoggerManager;
 import picocli.CommandLine;
